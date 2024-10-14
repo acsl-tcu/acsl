@@ -1,0 +1,7 @@
+Package: acsl
+Version: 1.0
+Description: package manager for acsl projects
+Maintainer: Kazuma SEKIGUCHI <ksekiguc@tcu.ac.jp>
+Architecture: all
+Installed-Size: 8
+Homepage: https://github.com/acsl-tcu/acsl.git/
