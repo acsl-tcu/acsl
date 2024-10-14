@@ -29,6 +29,7 @@ _EOT_
     echo $rule_file
   fi
   tmp=$(echo $unamestr | grep "jetson")
+  echo $tmp
   if [ -n "$tmp"]; then
     rule_file="default_jetson.rules"
     echo $rule_file
