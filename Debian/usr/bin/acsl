@@ -1,0 +1,208 @@
+#! /bin/bash
+
+function initialize_project() {
+  cat <<_EOT_
+  Initialize acsl project
+    PROJECT : $1
+    ROS DOMAIN ID : $2
+_EOT_
+  if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
+    source ~/.bashrc
+    cd .acsl/ros2/0_host_commands
+  else
+    echo "create .acsl folder"
+    mkdir .acsl
+    cd .acsl
+    git clone https://github.com/acsl-tcu/ros2.git
+    cd ros2/0_host_commands
+  fi
+  bash ./setup.sh $1 $2
+  cd ../../..
+  exit 1
+}
+
+#############################################################
+# Package install
+#############################################################
+# Usageを表示
+function usage() {
+  echo $1
+  cat <<_EOT_
+Usage:
+  $(basename $0) [-a] [-B] [-b bargv] ...
+
+Description:
+  XXX
+
+Options:
+  -a オプションa
+  -B オプションB
+  -b オプションbの引数値を指定
+  -h ヘルプ表示
+
+_EOT_
+  exit 1
+}
+
+# オプションフラグ用変数初期化
+function initOptionFlags() {
+  for char in {{a..z},{A..Z}}; do
+    eval OPT_FLAG_${char}=0
+  done
+}
+
+# オプション解析結果を表示
+function printOptions() {
+  echo "### 指定オプション一覧"
+  for char in {{a..z},{A..Z}}; do
+    opt=$(eval echo \${OPT_FLAG_${char}:-""})
+    optarg=$(eval echo \${OPT_VALUE_${char}:-""})
+    if [[ $opt = 1 ]]; then
+      echo "opt=-${char} ${optarg:+optarg=${optarg}}"
+    fi
+  done
+  echo
+}
+
+function install_package() {
+  if [[ -v ACSL_ROS2_DIR ]]; then
+    # オプションフラグ用変数初期化(OPT_FLAG_[a-zA-Z])
+    initOptionFlags
+
+    # getoptsでの引数判定
+    # l : launch file
+    # r : udev.rule file
+    # L : launch file sample
+    # R : udev.rules file sample
+    # D : dockerfile sample
+    while getopts ":l:r:LRDh" OPT; do
+      case $OPT in
+      h)
+        usage "Help"
+        continue
+        ;;
+      :)
+        usage "[ERROR] Option argument is undefined."
+        continue
+        ;;
+      \?)
+        usage "[ERROR] Undefined options."
+        continue
+        ;;
+      esac
+      # オプション解析
+      eval OPT_FLAG_${OPT}=1
+      eval OPT_VALUE_${OPT}=${OPTARG:-""}
+    done
+
+    # getopts分の引数値移動
+    shift $(($OPTIND - 1))
+
+    # オプション表示
+    printOptions
+
+    # 引数の数を確認
+    echo "### 引数一覧"
+    for argv in $@; do
+      echo ${argv}
+    done
+    echo
+    PACKAGE=${1}
+    echo $PACKAGE
+    if [[ $OPT_FLAG_L = 1 ]]; then
+      if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]]; then
+        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh launch_sample.sh
+        echo "sample launch file \"./launch_sample.sh\" is generated."
+      else
+        echo $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh
+        echo "No default launch file exists."
+      fi
+    fi
+    if [[ $OPT_FLAG_R = 1 ]]; then
+      if [[ -f $ACSL_ROS2_DIR/1_docker/common/rules/$PACKAGE.rules ]]; then
+        cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$PACKAGE.rules sample.rules
+        echo "sample udev.rules file \"./sample.rules\" is generated."
+      else
+        echo "No default rule file exists."
+      fi
+    fi
+    if [[ $OPT_FLAG_D = 1 ]]; then
+      if [[ -f $ACSL_ROS2_DIR/1_docker/dockerfiles/dockerfile.$PACKAGE ]]; then
+        cp -p $ACSL_ROS2_DIR/1_docker/dockerfiles/dockerfile.$PACKAGE dockerfile.sample
+        echo "sample docker file \"./dockerfile.sample\" is generated."
+      else
+        echo "No default docker file exists."
+      fi
+    fi
+
+    if [ $OPT_FLAG_L != 1 -a $OPT_FLAG_R != 1 -a $OPT_FLAG_D != 1 ]; then
+      if [[ $OPT_FLAG_r = 1 ]]; then
+        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${OPT_VALUE_r}
+      fi
+      if [[ $OPT_FLAG_l = 1 ]]; then
+        ROS_LAUNCH=$(ls -v $ACSL_ROS2_DIR/1_docker/common/ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
+        LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
+        cp ${OPT_VALUE_l} $ACSL_ROS2_DIR/1_docker/common/ros_launcher/$LAUNCH_FILE_NAME
+      fi
+      source ~/.bashrc
+      dpull ${1}
+      cd $ACSL_ROS2_DIR/0_host_commands
+      set_unique_var ./project_launch.sh "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $1" ${@:2:($# - 1)}
+    fi
+
+  else
+    echo "initialize first"
+  fi
+  exit 1
+}
+
+###################################################
+# Main part
+###################################################
+
+case ${1} in
+"init")
+  if [ $# -eq 3 ]; then
+    initialize_project ${@:2:($# - 1)}
+  else
+    echo "Usage : acsl init project_name ros_domain_id"
+  fi
+  ;;
+"install")
+  if [ $# -ge 2 ]; then
+    echo "install packages : ${@:2:($# - 1)}"
+    install_package ${@:2:($# - 1)}
+  else
+    echo "Usage : ascl install package_name"
+  fi
+  ;;
+"remove")
+  if [ $# -ge 2 ]; then
+    echo "remove packages : ${@:2:($# - 1)}"
+  else
+    echo "Usage : acsl remove package_name"
+  fi
+  ;;
+"clean")
+  if [[ -v ORGPATH ]]; then
+    export PATH="$ORGPATH"
+    sed -i '/ORGPATH/,$d' ~/.bashrc
+    # Delete after ORGPATH line
+    cd $ACSL_ROS2_DIR/0_host_commands
+    rm -f project_launch.sh project_launch.service
+    # udev 登録解除
+    sudo rm -f /etc/udev/rules.d/90-custom.rules
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    # systemd 登録解除
+    sudo rm /etc/systemd/system/project_launch.service
+    sudo systemctl stop project_launch
+    sudo systemctl daemon-reload
+    # .acsl 削除
+    cd $ACSL_ROS2_DIR/../../
+    rm -fr .acsl
+  fi
+  ;;
+esac
+
+# export ORGPATH="/home/sekiguchi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/java8path:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/mnt/c/Program Files/Razer/ChromaBroadcast/bin:/mnt/c/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64/compiler:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/Wolfram Research/WolframScript/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/MATLAB/R2024a/runtime/win64:/mnt/c/Program Files/MATLAB/R2024a/bin:/mnt/c/WINDOWS/system32/config/systemprofile/AppData/Local/Microsoft/WindowsApps:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/kasek/AppData/Local/Programs/Python/Python310/Scripts/:/mnt/c/Users/kasek/AppData/Local/Programs/Python/Python310/:/mnt/c/Users/kasek/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/kasek/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/kasek/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/texlive/2022/bin/win32:/mnt/c/Program Files/JetBrains/PyCharm 2024.2.2/bin:/snap/bin"
