@@ -1,23 +1,35 @@
 #! /bin/bash
 
+##############################################
+## Initilize
+##############################################
 function initialize_project() {
   cat <<_EOT_
   Initialize acsl project
     PROJECT : $1
     ROS DOMAIN ID : $2
 _EOT_
+  ACSL_ROS2_DIR="$(pwd)/.acsl"
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
     source ~/.bashrc
-    cd .acsl/ros2/0_host_commands
   else
     echo "create .acsl folder"
-    mkdir .acsl
-    cd .acsl
-    git clone https://github.com/acsl-tcu/ros2.git
-    cd ros2/0_host_commands
+    git clone https://github.com/acsl-tcu/ros2.git .acsl
   fi
-  bash ./setup.sh $1 $2
-  cd ../../..
+  #cd $ACSL_ROS2_DIR/0_host_commands
+  #bash ./setup.sh $1 $2
+  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
+  unamestr=$(uname -a)
+  rule_file="default.rules"
+  if [ -z $(echo $unamestr | grep "raspberrypi")]; then
+    rule_file="default_raspberry.rules"
+  fi
+  if [ -z $(echo $unamestr | grep "jetson")]; then
+    rule_file="default_jetson.rules"
+  fi
+  cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
+  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/0_host_commands/project_launch_sh
+  mkdir ros_launch
   exit 1
 }
 
@@ -62,6 +74,27 @@ function printOptions() {
     fi
   done
   echo
+}
+
+function remove_udev() {
+  PACKAGE=$1
+  TARGET=$PROJECT.rules
+  RULES="### $PACKAGE ###"
+  RULEE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$RULES" "$TARGET" | cut -d: -f1))
+  linee=($(grep -n "$RULEE" "$TARGET" | cut -d: -f1))
+  sed -e "${lines},${linee}d" $TARGET
+}
+function remove_systemd() {
+  PACKAGE=$1
+  TARGET=launch_$PROJECT.sh
+  LAUNCHS="### $PACKAGE ###"
+  LAUNCHE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$LAUNCHS" "$TARGET" | cut -d: -f1))
+  linee=($(grep -n "$LAUNCHE" "$TARGET" | cut -d: -f1))
+  sed -e "${lines},${linee}d" $TARGET
 }
 
 function install_package() {
@@ -136,23 +169,41 @@ function install_package() {
     fi
 
     if [ $OPT_FLAG_L != 1 -a $OPT_FLAG_R != 1 -a $OPT_FLAG_D != 1 ]; then
+      remove_package $PACKAGE
       if [[ $OPT_FLAG_r = 1 ]]; then
-        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${OPT_VALUE_r}
+        echo "### $PACKAGE ###" >>${PROJECT}.rules
+        cat ${OPT_VALUE_r} >>${PROJECT}.rules
+        echo "### $PACKAGE END ###" >>${PROJECT}.rules
+        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
+        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ./ros_launcher/
         ROS_LAUNCH=$(ls -v $ACSL_ROS2_DIR/1_docker/common/ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
         LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
         cp ${OPT_VALUE_l} $ACSL_ROS2_DIR/1_docker/common/ros_launcher/$LAUNCH_FILE_NAME
+        echo "### $PACKAGE ###" >>project_launch.sh
+        echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
+        echo "### $PACKAGE END ###" >>project_launch.sh
       fi
+
       source ~/.bashrc
-      dpull ${1}
-      cd $ACSL_ROS2_DIR/0_host_commands
-      set_unique_var ./project_launch.sh "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $1" ${@:2:($# - 1)}
+      dpull $PACKAGE
+      $ACSL_ROS2_DIR/0_host_commands/setup_udev $PROJECT.rules
     fi
 
   else
     echo "initialize first"
   fi
+  exit 1
+}
+
+###################################################
+function remove_package() {
+  PACKAGE=$1
+  ## udev.rule
+  remove_udev $PACKAGE
+  ## launch
+  remove_systemd $PACKAGE
   exit 1
 }
 
@@ -204,5 +255,3 @@ case ${1} in
   fi
   ;;
 esac
-
-# export ORGPATH="/home/sekiguchi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/java8path:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/mnt/c/Program Files/Razer/ChromaBroadcast/bin:/mnt/c/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64/compiler:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/Wolfram Research/WolframScript/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/MATLAB/R2024a/runtime/win64:/mnt/c/Program Files/MATLAB/R2024a/bin:/mnt/c/WINDOWS/system32/config/systemprofile/AppData/Local/Microsoft/WindowsApps:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/kasek/AppData/Local/Programs/Python/Python310/Scripts/:/mnt/c/Users/kasek/AppData/Local/Programs/Python/Python310/:/mnt/c/Users/kasek/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/kasek/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/kasek/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/texlive/2022/bin/win32:/mnt/c/Program Files/JetBrains/PyCharm 2024.2.2/bin:/snap/bin"
