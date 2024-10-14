@@ -26,11 +26,11 @@ _EOT_
   tmp=$(echo $unamestr | grep "raspberrypi")
   echo "+=++++++++++++++"
   echo $tmp
-  if [ -n $tmp ]; then
+  if [ -n "$tmp" ]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
-  if [ -n $(echo $unamestr | grep "jetson")]; then
+  if [ -n "$(echo $unamestr | grep "jetson")"]; then
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
