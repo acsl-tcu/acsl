@@ -23,7 +23,8 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
   unamestr=$(uname -a)
   rule_file="default.rules"
-  if [ -n $(echo $unamestr | grep "raspberrypi")]; then
+  tmp=$(echo $unamestr | grep "raspberrypi")
+  if [ -n $tmp ]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
