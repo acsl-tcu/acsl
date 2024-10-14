@@ -24,6 +24,8 @@ _EOT_
   unamestr=$(uname -a)
   rule_file="default.rules"
   tmp=$(echo $unamestr | grep "raspberrypi")
+  echo "+=++++++++++++++"
+  echo $tmp
   if [ -n $tmp ]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
