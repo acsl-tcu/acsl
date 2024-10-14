@@ -239,7 +239,7 @@ case ${1} in
     export PATH="$ORGPATH"
     sed -i '/ORGPATH/,$d' ~/.bashrc
     # Delete after ORGPATH line
-    cd $ACSL_ROS2_DIR/0_host_commands
+    cd $ACSL_ROS2_DIR/../
     rm -f project_launch.sh project_launch.service
     # udev 登録解除
     sudo rm -f /etc/udev/rules.d/90-custom.rules
@@ -250,7 +250,6 @@ case ${1} in
     sudo systemctl stop project_launch
     sudo systemctl daemon-reload
     # .acsl 削除
-    cd $ACSL_ROS2_DIR/../../
     rm -fr .acsl
   fi
   ;;
