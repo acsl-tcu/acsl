@@ -23,11 +23,13 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
   unamestr=$(uname -a)
   rule_file="default.rules"
-  if [ -z $(echo $unamestr | grep "raspberrypi")]; then
+  if [ -n $(echo $unamestr | grep "raspberrypi")]; then
     rule_file="default_raspberry.rules"
+    echo $rule_file
   fi
-  if [ -z $(echo $unamestr | grep "jetson")]; then
+  if [ -n $(echo $unamestr | grep "jetson")]; then
     rule_file="default_jetson.rules"
+    echo $rule_file
   fi
   cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/0_host_commands/project_launch_sh
