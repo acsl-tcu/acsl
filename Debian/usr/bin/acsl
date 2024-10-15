@@ -28,7 +28,7 @@ _EOT_
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
-  echo "============================="
+  echo "=====aaaaa========================"
   tmp=$(uname -a | grep "jetson")
   echo $tmp
   if [ -n "$tmp"]; then
