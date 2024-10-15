@@ -32,7 +32,9 @@ _EOT_
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
+  
   source ~/.bashrc
+  echo "After setup_bashrc    $ACSL_ROS2_DIR"
   if [[ ! -f $PROJECT.rules ]]; then
     rule_file="default.rules"
     tmp=$(uname -a | grep "raspberrypi")
