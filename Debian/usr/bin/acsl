@@ -118,6 +118,11 @@ function remove_systemd() {
   fi
 }
 
+function check_image(){
+  res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
+  
+}
+
 function install_package() {
   if [[ -v ACSL_ROS2_DIR ]]; then
     # オプションフラグ用変数初期化(OPT_FLAG_[a-zA-Z])
