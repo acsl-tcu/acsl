@@ -92,6 +92,7 @@ function printOptions() {
 }
 
 function remove_udev() {
+  echo "Remove udev"
   PACKAGE=$1
   TARGET=$PROJECT.rules
   RULES="### $PACKAGE ###"
@@ -102,8 +103,9 @@ function remove_udev() {
   sed -e "${lines},${linee}d" $TARGET
 }
 function remove_systemd() {
+  echo "Remove systemd"
   PACKAGE=$1
-  TARGET=launch_$PROJECT.sh
+  TARGET=project_launch.sh
   LAUNCHS="### $PACKAGE ###"
   LAUNCHE="### $PACKAGE END ###"
   # 文字列Aが含まれる行の行数を取得
@@ -219,6 +221,7 @@ _EOT_
 
 ###################################################
 function remove_package() {
+  echo "Remove package"
   PACKAGE=$1
   ## udev.rule
   remove_udev $PACKAGE
