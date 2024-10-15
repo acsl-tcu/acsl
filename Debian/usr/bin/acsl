@@ -196,25 +196,33 @@ _EOT_
 
     if [ $OPT_FLAG_L != 1 -a $OPT_FLAG_R != 1 -a $OPT_FLAG_D != 1 ]; then
       remove_package $PACKAGE
+      echo "Set udev rule"
+      echo "### $PACKAGE ###" >>${PROJECT}.rules
       if [[ $OPT_FLAG_r = 1 ]]; then
-        echo "### $PACKAGE ###" >>${PROJECT}.rules
         cat ${OPT_VALUE_r} >>${PROJECT}.rules
-        echo "### $PACKAGE END ###" >>${PROJECT}.rules
-        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
+      elif [[ -f $ACSL_ROS2_DIR/1_docker/common/rules/${PACKAGE}.rules ]]; then
+        cat $ACSL_ROS2_DIR/1_docker/common/rules/${PACKAGE}.rules >>${PROJECT}.rules
+      fi
+      echo "### $PACKAGE END ###" >>${PROJECT}.rules
+      $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
+  
+      echo "Set ros launch"
+      if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]];then
+        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ./ros_launcher/
+        else
+        touch ./ros_launcher/launch_$PACKAGE.sh
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
-        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ./ros_launcher/
-        ROS_LAUNCH=$(ls -v $ACSL_ROS2_DIR/1_docker/common/ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
+        ROS_LAUNCH=$(ls -v ./ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
         LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
-        cp ${OPT_VALUE_l} $ACSL_ROS2_DIR/1_docker/common/ros_launcher/$LAUNCH_FILE_NAME
-        echo "### $PACKAGE ###" >>project_launch.sh
-        echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
-        echo "### $PACKAGE END ###" >>project_launch.sh
+        cp ${OPT_VALUE_l} ./ros_launcher/$LAUNCH_FILE_NAME
       fi
+      echo "### $PACKAGE ###" >>project_launch.sh
+      echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
+      echo "### $PACKAGE END ###" >>project_launch.sh
 
       source ~/.bashrc
       dpull $PACKAGE
-      $ACSL_ROS2_DIR/0_host_commands/setup_udev $PROJECT.rules
     fi
 
   else
@@ -229,8 +237,10 @@ function remove_package() {
   PACKAGE=$1
   ## udev.rule
   remove_udev $PACKAGE
-  ## launch
+  ## systemd
   remove_systemd $PACKAGE
+  ## ros launch
+  rm -f ros_launcher/launch_${PACKAGE}.sh*
   exit 1
 }
 
