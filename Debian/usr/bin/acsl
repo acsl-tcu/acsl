@@ -315,6 +315,8 @@ function remove_package() {
   ## ros launch
   source ~/.bashrc
   rm -fr $ACSL_WORK_DIR/ros_launcher/launch_${PACKAGE}*
+  ## ros package
+  rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
   ## docker image
   drmi $PACKAGE
 }
