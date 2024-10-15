@@ -258,13 +258,12 @@ _EOT_
     cd $ACSL_WORK_DIR/.install/main
     git fetch
     package_list=($(git branch -a|grep remote | grep -v HEAD |grep -v main| sed -e "s|remotes/origin/||g"))
+    cd $ACSL_WORK_DIR
 
     if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
       git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_packages/* $ACSL_WORK_DIR/ros_packages/
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
-      cat ${PROJECT}.rules
-      echo $(pwd)
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
       if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
         $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
