@@ -123,12 +123,12 @@ function update_tag_list(){
   res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
-  res=(${res//,/}) >> tag_list
+  res=(${res//,/}) >> $ACSL_ROS2_DIR/tag_list
 }
 
 function dpull_check_tag(){
   tag=$1
-  res=$(cat tag_list | grep $tag)
+  res=$(cat $ACSL_ROS2_DIR/tag_list | grep $tag)
   if [[ -n res ]]; then
     dpull $tag    
   fi
@@ -257,6 +257,8 @@ function remove_package() {
   remove_systemd $PACKAGE
   ## ros launch
   rm -f ros_launcher/launch_${PACKAGE}.sh*
+  ## docker image
+  drmi $PACKAGE
 }
 
 ###################################################
