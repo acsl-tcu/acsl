@@ -242,6 +242,10 @@ _EOT_
     ####################################
     ##  Install package main
     ####################################
+    ## udev.rule
+    remove_udev $PACKAGE
+    ## systemd
+    remove_systemd $PACKAGE
     if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
       mkdir $ACSL_WORK_DIR/.install
       cd $ACSL_WORK_DIR/.install
@@ -266,10 +270,6 @@ _EOT_
     fi
 
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
-  ## udev.rule
-  remove_udev $PACKAGE
-  ## systemd
-  remove_systemd $PACKAGE
 
       echo "Set udev rule"
       if [[ $OPT_FLAG_r = 1 ]]; then
