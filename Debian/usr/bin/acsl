@@ -194,7 +194,8 @@ _EOT_
       fi
     fi
 
-    if [ $OPT_FLAG_L != 1 -a $OPT_FLAG_R != 1 -a $OPT_FLAG_D != 1 ]; then
+
+    if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
       remove_package $PACKAGE
       echo "Set udev rule"
       echo "### $PACKAGE ###" >>${PROJECT}.rules
