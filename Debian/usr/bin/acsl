@@ -266,7 +266,10 @@ _EOT_
     fi
 
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
-      remove_package $PACKAGE
+  ## udev.rule
+  remove_udev $PACKAGE
+  ## systemd
+  remove_systemd $PACKAGE
 
       echo "Set udev rule"
       if [[ $OPT_FLAG_r = 1 ]]; then
