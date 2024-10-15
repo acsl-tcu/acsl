@@ -253,8 +253,9 @@ _EOT_
       $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
   
       echo "Set ros launch"
-      if [[ -f $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh ]];then
-        cp -p $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh $ACSL_WORK_DIR/ros_launcher/
+      tmp=$(ls $ACSL_ROS2_DIR/ros_launcher | grep launch_$PACKAGE)
+      if [[ -n "$tmp" ]];then
+        cp -rp $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE* $ACSL_WORK_DIR/ros_launcher/
       else
         touch ./ros_launcher/launch_$PACKAGE.sh
         recho "Modify ./ros_launcher/launch_$PACKAGE.sh"
@@ -291,7 +292,7 @@ function remove_package() {
   remove_systemd $PACKAGE
   ## ros launch
   source ~/.bashrc
-  rm -f $ACSL_WORK_DIR/ros_launcher/launch_${PACKAGE}.sh*
+  rm -fr $ACSL_WORK_DIR/ros_launcher/launch_${PACKAGE}*
   ## docker image
   drmi $PACKAGE
 }
