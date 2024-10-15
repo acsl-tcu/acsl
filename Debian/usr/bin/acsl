@@ -269,6 +269,7 @@ function remove_package() {
 # Main part
 ###################################################
 source ~/.bashrc
+echo $ACSL_ROS2_DIR
 case ${1} in
 "init")
   if [ $# -eq 3 ]; then
