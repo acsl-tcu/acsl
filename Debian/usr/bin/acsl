@@ -4,10 +4,12 @@
 ## Initilize
 ##############################################
 function initialize_project() {
+  PROJECT=$1
+  RID=$2
   cat <<_EOT_
   Initialize acsl project
-    PROJECT : $1
-    ROS DOMAIN ID : $2
+    PROJECT : $PROJECT
+    ROS DOMAIN ID : $RID
 _EOT_
   ACSL_ROS2_DIR="$(pwd)/.acsl"
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
