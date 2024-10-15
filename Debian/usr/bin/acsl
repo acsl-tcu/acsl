@@ -21,17 +21,16 @@ _EOT_
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
-  unamestr=$(uname -a)
   rule_file="default.rules"
-  tmp=$(echo $unamestr | grep "raspberrypi")
+  tmp=$(uname -a | grep "raspberrypi")
+  echo $tmp
   if [ -n "$tmp" ]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
-  tmp=$(echo $unamestr | grep "jetson")
   echo "============================="
+  tmp=$(uname -a | grep "jetson")
   echo $tmp
-
   if [ -n "$tmp"]; then
     rule_file="default_jetson.rules"
     echo $rule_file
