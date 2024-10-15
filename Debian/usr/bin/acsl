@@ -161,7 +161,7 @@ function install_package() {
     PROJECT : $PROJECT
     ROS DOMAIN ID : $RID
     PACKAGE : $1
-_EOT_ 
+_EOT_
     if [[ $OPT_FLAG_L = 1 ]]; then
       if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]]; then
         cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh launch_sample.sh
