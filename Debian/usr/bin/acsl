@@ -35,6 +35,7 @@ _EOT_
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
+  echo $(uname -a)
   tmp=$(uname -a | grep "microsoft")
   echo $tmp
   if [ -n "$tmp"]; then
