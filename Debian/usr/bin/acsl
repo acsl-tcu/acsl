@@ -45,6 +45,7 @@ _EOT_
   if [[ -z ros_launch ]];then 
     mkdir ros_launch
   fi
+  bash
 }
 
 #############################################################
