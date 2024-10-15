@@ -30,12 +30,12 @@ _EOT_
     echo $rule_file
   fi
   tmp=$(uname -a | grep "jetson")
-  if [ -n $tmp]; then
+  if [ -n $tmp ]; then
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
   tmp=$(uname -a | grep "microsoft")
-  if [ -n $tmp]; then
+  if [ -n $tmp ]; then
     rule_file="default.rules"
     echo $rule_file
   fi
