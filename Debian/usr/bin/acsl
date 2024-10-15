@@ -56,10 +56,12 @@ _EOT_
     cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
   fi
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch.sh
-
+  chmod a+x project_launch.sh
   if [[ ! -d ros_launcher ]];then 
     mkdir ros_launcher
   fi
+  chmod -R a+x ros_launcher
+
   if [[ ! -d ros_packages ]];then 
     mkdir ros_packages
   fi  
