@@ -25,24 +25,22 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
   rule_file="default.rules"
   tmp=$(uname -a | grep "raspberrypi")
-  echo $tmp
-  if [ -n "$tmp" ]; then
+  if [ -n $tmp ]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
-  echo "=====aaaaa========================"
   tmp=$(uname -a | grep "jetson")
-  echo $tmp
-  if [ -n "$tmp"]; then
+  if [ -n $tmp]; then
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
   tmp=$(uname -a | grep "microsoft")
-  echo $tmp
-  if [ -n "$tmp"]; then
+  if [ -n $tmp]; then
     rule_file="default.rules"
     echo $rule_file
   fi
+  echo "==========================="
+  echo $rule_file
   cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/0_host_commands/project_launch_sh
   mkdir ros_launch
