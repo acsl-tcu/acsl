@@ -340,6 +340,7 @@ case ${1} in
     # .acsl 削除
     echo "Delete .acsl"
     rm -fr .*
+    rm -fr *
   fi
   ;;
 esac
