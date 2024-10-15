@@ -295,7 +295,7 @@ case ${1} in
   fi
   ;;
 "update_tag_list")
-    bash -c update_tag_list
+    update_tag_list
   ;;
 "clean")
   if [[ -v ORGPATH ]]; then
