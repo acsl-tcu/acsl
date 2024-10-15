@@ -58,6 +58,7 @@ _EOT_
   if [[ ! -f project_launch.sh ]]; then
     cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
   fi
+  sed -i "s|homedir|$HOME|g" project_launch.sh
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch.sh
   chmod a+x project_launch.sh
   if [[ ! -d ros_launcher ]];then 
@@ -240,6 +241,7 @@ _EOT_
 
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
       remove_package $PACKAGE
+
       echo "Set udev rule"
       echo "### $PACKAGE ###" >>${PROJECT}.rules
       if [[ $OPT_FLAG_r = 1 ]]; then
@@ -261,6 +263,8 @@ _EOT_
         LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
         cp ${OPT_VALUE_l} ./ros_launcher/$LAUNCH_FILE_NAME
       fi
+
+      echo "set project_launch.sh"
       echo "### $PACKAGE ###" >>project_launch.sh
       echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
       echo "### $PACKAGE END ###" >>project_launch.sh
