@@ -264,6 +264,7 @@ _EOT_
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_packages/* $ACSL_WORK_DIR/ros_packages/
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
       cat ${PROJECT}.rules
+      echo $(pwd)
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
       if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
         $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
