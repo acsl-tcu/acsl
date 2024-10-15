@@ -41,7 +41,7 @@ _EOT_
   fi
   cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
   cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
-  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch_sh
+  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch.sh
   mkdir ros_launch
   exit 1
 }
