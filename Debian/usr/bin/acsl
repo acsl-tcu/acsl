@@ -25,17 +25,17 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
   rule_file="default.rules"
   tmp=$(uname -a | grep "raspberrypi")
-  if [ -n $tmp ]; then
+  if [[ -n $tmp ]]; then
     rule_file="default_raspberry.rules"
     echo $rule_file
   fi
   tmp=$(uname -a | grep "jetson")
-  if [ -n $tmp ]; then
+  if [[ -n $tmp ]]; then
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
   tmp=$(uname -a | grep "microsoft")
-  if [ -n $tmp ]; then
+  if [[ -n $tmp ]]; then
     rule_file="default.rules"
     echo $rule_file
   fi
