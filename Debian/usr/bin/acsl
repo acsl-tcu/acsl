@@ -120,11 +120,12 @@ function remove_systemd() {
 }
 
 function update_tag_list(){
+  cd $ACSL_ROS2_DIR
+  git checkout .
   res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
   res=(${res//,/}) >> $ACSL_ROS2_DIR/tag_list
-  cd $ACSL_ROS2_DIR
   git add .
   git commit -m "update tag_list"
   git push
@@ -294,7 +295,7 @@ case ${1} in
   fi
   ;;
 "update_tag_list")
-    update_tag_list
+    bash -c update_tag_list
   ;;
 "clean")
   if [[ -v ORGPATH ]]; then
