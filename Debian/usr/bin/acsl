@@ -11,10 +11,17 @@ function initialize_project() {
     PROJECT : $PROJECT
     ROS DOMAIN ID : $RID
 _EOT_
-  ACSL_ROS2_DIR="$(pwd)/.acsl"
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
     source ~/.bashrc
   else
+    cfs=$(ls .)
+    if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
+      git clone git@github.com:acsl-tcu/$PROJECT
+      cd $PROJECT
+    else
+      git clone git@github.com:acsl-tcu/$PROJECT .
+    fi
+    ACSL_ROS2_DIR="$(pwd)/.acsl"
     echo "create .acsl folder"
     #git clone https://github.com/acsl-tcu/ros2.git .acsl
     git clone git@github.com:acsl-tcu/ros2.git .acsl
@@ -24,28 +31,37 @@ _EOT_
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
-  rule_file="default.rules"
-  tmp=$(uname -a | grep "raspberrypi")
-  if [[ -n $tmp ]]; then
-    rule_file="default_raspberry.rules"
-    echo $rule_file
-  fi
-  tmp=$(uname -a | grep "jetson")
-  if [[ -n $tmp ]]; then
-    rule_file="default_jetson.rules"
-    echo $rule_file
-  fi
-  tmp=$(uname -a | grep "microsoft")
-  if [[ -n $tmp ]]; then
+  if [[ ! -f $PROJECT.rules ]]; then
     rule_file="default.rules"
-    echo $rule_file
+    tmp=$(uname -a | grep "raspberrypi")
+    if [[ -n $tmp ]]; then
+      rule_file="default_raspberry.rules"
+      echo $rule_file
+    fi
+    tmp=$(uname -a | grep "jetson")
+    if [[ -n $tmp ]]; then
+      rule_file="default_jetson.rules"
+      echo $rule_file
+    fi
+    tmp=$(uname -a | grep "microsoft")
+    if [[ -n $tmp ]]; then
+      rule_file="default.rules"
+      echo $rule_file
+    fi
+    cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
   fi
-  cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
-  cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
+
+  if [[ ! -f project_launch.sh ]]; then
+    cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
+  fi
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch.sh
-  if [[ ! -d ros_launch ]];then 
-    mkdir ros_launch
+
+  if [[ ! -d ros_launcher ]];then 
+    mkdir ros_launcher
   fi
+  if [[ ! -d ros_packages ]];then 
+    mkdir ros_packages
+  fi  
   dpull_check_tag image_$PROJECT
   bash
 }
