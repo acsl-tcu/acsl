@@ -35,7 +35,6 @@ _EOT_
     rule_file="default_jetson.rules"
     echo $rule_file
   fi
-  echo $(uname -a)
   tmp=$(uname -a | grep "microsoft")
   echo $tmp
   if [ -n "$tmp"]; then
@@ -252,19 +251,27 @@ case ${1} in
 "clean")
   if [[ -v ORGPATH ]]; then
     export PATH="$ORGPATH"
+    echo "Delete after ORGPATH line"
     sed -i '/ORGPATH/,$d' ~/.bashrc
-    # Delete after ORGPATH line
+
+    echo "Delete project file"
     cd $ACSL_ROS2_DIR/../
     rm -f project_launch.sh project_launch.service
+    
     # udev 登録解除
+    echo "Deactivate udev"
+    rm -f *.rules
     sudo rm -f /etc/udev/rules.d/90-custom.rules
     sudo udevadm control --reload-rules
     sudo udevadm trigger
+    
     # systemd 登録解除
+    echo "Unload systemd"
     sudo rm /etc/systemd/system/project_launch.service
     sudo systemctl stop project_launch
     sudo systemctl daemon-reload
     # .acsl 削除
+    echo "Delete .acsl"
     rm -fr .acsl
   fi
   ;;
