@@ -225,6 +225,7 @@ function remove_package() {
 # Main part
 ###################################################
 source ~/.bashrc
+echo $ORGPATH
 case ${1} in
 "init")
   if [ $# -eq 3 ]; then
