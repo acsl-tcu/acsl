@@ -239,15 +239,36 @@ _EOT_
       fi
     fi
 
+    ####################################
+    ##  Install package main
+    ####################################
+    if [[ -d $ACSL_WORK_DIR/.install ]]; then
+      mkdir $ACSL_WORK_DIR/.install
+      cd $ACSL_WORK_DIR/.install
+      git clone git@github.com:acsl-tcu/ros_package main
+      cd -
+    fi
+
+    echo "### $PACKAGE ###" >>${PROJECT}.rules
+
+    cd $ACSL_WORK_DIR/.install/main
+    git fetch
+    package_list==($(git branch -a|grep remote | grep -v HEAD |grep -v main| sed -e "s|remotes/origin/||g"))
+
+    if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
+      git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
+      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_packages/* $ACSL_WORK_DIR/ros_packages/
+      cat $ACSL_WORK_DIR/${PACKAGE}.rules >>${PROJECT}.rules
+      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
+      $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
+    fi
+
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
       remove_package $PACKAGE
 
       echo "Set udev rule"
-      echo "### $PACKAGE ###" >>${PROJECT}.rules
       if [[ $OPT_FLAG_r = 1 ]]; then
         cat ${OPT_VALUE_r} >>${PROJECT}.rules
-      elif [[ -f $ACSL_ROS2_DIR/rules/${PACKAGE}.rules ]]; then
-        cat $ACSL_ROS2_DIR/rules/${PACKAGE}.rules >>${PROJECT}.rules
       fi
       echo "### $PACKAGE END ###" >>${PROJECT}.rules
       $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
@@ -272,8 +293,7 @@ _EOT_
       echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
       echo "### $PACKAGE END ###" >>project_launch.sh
 
-      source ~/.bashrc
-      dpull_check_tag $PACKAGE
+      #dpull_check_tag $PACKAGE
     fi
 
   else
