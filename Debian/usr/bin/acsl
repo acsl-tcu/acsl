@@ -257,12 +257,14 @@ _EOT_
         cp -p $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh $ACSL_WORK_DIR/ros_launcher/
       else
         touch ./ros_launcher/launch_$PACKAGE.sh
+        recho "Modify ./ros_launcher/launch_$PACKAGE.sh"
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
         ROS_LAUNCH=$(ls -v ./ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
         LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
         cp ${OPT_VALUE_l} ./ros_launcher/$LAUNCH_FILE_NAME
       fi
+      chmod -R a+x ./ros_launcher
 
       echo "set project_launch.sh"
       echo "### $PACKAGE ###" >>project_launch.sh
