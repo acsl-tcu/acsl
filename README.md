@@ -41,5 +41,6 @@ PACKAGE : [package name]()
 
 ## Maintenance
 ```bash
+  acsl/Debian> md5sum usr/bin/acsl | tee DEBIAN/md5sums
   acsl> fakeroot dpkg-deb --build Debian .
 ```
