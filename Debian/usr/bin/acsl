@@ -45,6 +45,7 @@ _EOT_
   if [[ ! -d ros_launch ]];then 
     mkdir ros_launch
   fi
+  dpull_check_tag image_$PROJECT
   bash
 }
 
@@ -118,9 +119,19 @@ function remove_systemd() {
   fi
 }
 
-function check_image(){
+function update_tag_list(){
   res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
-  
+  res=$(echo ${res##*[})
+  res=$(echo ${res%%]*})
+  res=(${res//,/}) >> tag_list
+}
+
+function dpull_check_tag(){
+  tag=$1
+  res=$(cat tag_list | grep $tag)
+  if [[ -n res ]]; then
+    dpull $tag    
+  fi
 }
 
 function install_package() {
@@ -227,7 +238,7 @@ _EOT_
       echo "### $PACKAGE END ###" >>project_launch.sh
 
       source ~/.bashrc
-      dpull $PACKAGE
+      dpull_check_tag $PACKAGE
     fi
 
   else
@@ -274,6 +285,9 @@ case ${1} in
   else
     echo "Usage : acsl remove package_name"
   fi
+  ;;
+"update_tag_list")
+    update_tag_list
   ;;
 "clean")
   if [[ -v ORGPATH ]]; then
