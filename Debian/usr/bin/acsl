@@ -126,7 +126,7 @@ function remove_udev() {
   lines=($(grep -n "$RULES" "$TARGET" | cut -d: -f1))
   linee=($(grep -n "$RULEE" "$TARGET" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -e "${lines},${linee}d" $TARGET
+    sed -i -e "${lines},${linee}d" $TARGET
   fi
 }
 function remove_systemd() {
@@ -139,7 +139,7 @@ function remove_systemd() {
   lines=($(grep -n "$LAUNCHS" "$TARGET" | cut -d: -f1))
   linee=($(grep -n "$LAUNCHE" "$TARGET" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -e "${lines},${linee}d" $TARGET
+    sed -i -e "${lines},${linee}d" $TARGET
   fi
 }
 
