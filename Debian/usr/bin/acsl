@@ -283,6 +283,7 @@ _EOT_
 
 ###################################################
 function remove_package() {
+  source ~/.bashrc
   echo "Remove package"
   PACKAGE=$1
   ## udev.rule
@@ -290,7 +291,6 @@ function remove_package() {
   ## systemd
   remove_systemd $PACKAGE
   ## ros launch
-  echo $ACSL_WORD_DIR
   rm -f $ACSL_WORD_DIR/ros_launcher/launch_${PACKAGE}.sh*
   ## docker image
   drmi $PACKAGE
