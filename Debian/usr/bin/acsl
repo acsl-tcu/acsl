@@ -339,7 +339,7 @@ case ${1} in
     sudo systemctl daemon-reload
     # .acsl 削除
     echo "Delete .acsl"
-    rm -fr .acsl
+    rm -fr .*
   fi
   ;;
 esac
