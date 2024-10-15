@@ -260,7 +260,9 @@ _EOT_
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_packages/* $ACSL_WORK_DIR/ros_packages/
       cat $ACSL_WORK_DIR/${PACKAGE}.rules >>${PROJECT}.rules
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
-      $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
+      if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
+        $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
+      fi
     fi
 
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
@@ -279,7 +281,7 @@ _EOT_
         cp -rp $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE* $ACSL_WORK_DIR/ros_launcher/
       else
         touch ./ros_launcher/launch_$PACKAGE.sh
-        recho "Modify ./ros_launcher/launch_$PACKAGE.sh"
+        echo "Modify ./ros_launcher/launch_$PACKAGE.sh"
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
         ROS_LAUNCH=$(ls -v ./ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
