@@ -100,7 +100,9 @@ function remove_udev() {
   # 文字列Aが含まれる行の行数を取得
   lines=($(grep -n "$RULES" "$TARGET" | cut -d: -f1))
   linee=($(grep -n "$RULEE" "$TARGET" | cut -d: -f1))
-  sed -e "${lines},${linee}d" $TARGET
+  if [[ -n $lines ]]; then
+    sed -e "${lines},${linee}d" $TARGET
+  fi
 }
 function remove_systemd() {
   echo "Remove systemd"
@@ -111,7 +113,9 @@ function remove_systemd() {
   # 文字列Aが含まれる行の行数を取得
   lines=($(grep -n "$LAUNCHS" "$TARGET" | cut -d: -f1))
   linee=($(grep -n "$LAUNCHE" "$TARGET" | cut -d: -f1))
-  sed -e "${lines},${linee}d" $TARGET
+  if [[ -n $lines ]]; then
+    sed -e "${lines},${linee}d" $TARGET
+  fi
 }
 
 function install_package() {
