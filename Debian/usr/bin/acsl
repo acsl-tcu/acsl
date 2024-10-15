@@ -242,7 +242,7 @@ _EOT_
     ####################################
     ##  Install package main
     ####################################
-    if [[ -d $ACSL_WORK_DIR/.install ]]; then
+    if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
       mkdir $ACSL_WORK_DIR/.install
       cd $ACSL_WORK_DIR/.install
       git clone git@github.com:acsl-tcu/ros_package main
