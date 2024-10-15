@@ -124,6 +124,10 @@ function update_tag_list(){
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
   res=(${res//,/}) >> $ACSL_ROS2_DIR/tag_list
+  cd $ACSL_ROS2_DIR
+  git add .
+  git commit -m "update tag_list"
+  git push
 }
 
 function dpull_check_tag(){
