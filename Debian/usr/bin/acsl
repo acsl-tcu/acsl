@@ -27,10 +27,11 @@ _EOT_
     git clone git@github.com:acsl-tcu/ros2.git .acsl
     chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
     chmod -R a+x $ACSL_ROS2_DIR/1_docker/common/scripts
+    ACSL_WORK_DIR="$(pwd)"
   fi
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
-  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $@
+  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
   if [[ ! -f $PROJECT.rules ]]; then
     rule_file="default.rules"
     tmp=$(uname -a | grep "raspberrypi")
@@ -48,7 +49,7 @@ _EOT_
       rule_file="default.rules"
       echo $rule_file
     fi
-    cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
+    cp -p $ACSL_ROS2_DIR/rules/$rule_file ./$PROJECT.rules
   fi
 
   if [[ ! -f project_launch.sh ]]; then
@@ -207,17 +208,17 @@ function install_package() {
     PACKAGE : $1
 _EOT_
     if [[ $OPT_FLAG_L = 1 ]]; then
-      if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]]; then
-        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh launch_sample.sh
+      if [[ -f $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh ]]; then
+        cp -p $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh launch_sample.sh
         echo "sample launch file \"./launch_sample.sh\" is generated."
       else
-        echo $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh
+        echo $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh
         echo "No default launch file exists."
       fi
     fi
     if [[ $OPT_FLAG_R = 1 ]]; then
-      if [[ -f $ACSL_ROS2_DIR/1_docker/common/rules/$PACKAGE.rules ]]; then
-        cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$PACKAGE.rules sample.rules
+      if [[ -f $ACSL_ROS2_DIR/rules/$PACKAGE.rules ]]; then
+        cp -p $ACSL_ROS2_DIR/rules/$PACKAGE.rules sample.rules
         echo "sample udev.rules file \"./sample.rules\" is generated."
       else
         echo "No default rule file exists."
@@ -238,16 +239,16 @@ _EOT_
       echo "### $PACKAGE ###" >>${PROJECT}.rules
       if [[ $OPT_FLAG_r = 1 ]]; then
         cat ${OPT_VALUE_r} >>${PROJECT}.rules
-      elif [[ -f $ACSL_ROS2_DIR/1_docker/common/rules/${PACKAGE}.rules ]]; then
-        cat $ACSL_ROS2_DIR/1_docker/common/rules/${PACKAGE}.rules >>${PROJECT}.rules
+      elif [[ -f $ACSL_ROS2_DIR/rules/${PACKAGE}.rules ]]; then
+        cat $ACSL_ROS2_DIR/rules/${PACKAGE}.rules >>${PROJECT}.rules
       fi
       echo "### $PACKAGE END ###" >>${PROJECT}.rules
       $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
   
       echo "Set ros launch"
-      if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]];then
-        cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ./ros_launcher/
-        else
+      if [[ -f $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh ]];then
+        cp -p $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE.sh $ACSL_WORK_DIR/ros_launcher/
+      else
         touch ./ros_launcher/launch_$PACKAGE.sh
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
