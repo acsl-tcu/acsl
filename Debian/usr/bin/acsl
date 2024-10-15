@@ -194,7 +194,7 @@ _EOT_
       fi
     fi
 
-
+    echo "Install package"
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
       remove_package $PACKAGE
       echo "Set udev rule"
