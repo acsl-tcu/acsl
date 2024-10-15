@@ -159,7 +159,7 @@ function dpull_check_tag(){
   tag=$1
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep $tag)
   if [[ -n res ]]; then
-    dpull $tag    
+    $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag    
   fi
 }
 
