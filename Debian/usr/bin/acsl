@@ -39,10 +39,9 @@ _EOT_
     rule_file="default.rules"
     echo $rule_file
   fi
-  echo "==========================="
-  echo $rule_file
   cp -p $ACSL_ROS2_DIR/1_docker/common/rules/$rule_file ./$PROJECT.rules
-  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/0_host_commands/project_launch_sh
+  cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
+  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch_sh
   mkdir ros_launch
   exit 1
 }
