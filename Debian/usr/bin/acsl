@@ -194,7 +194,6 @@ _EOT_
       fi
     fi
 
-    echo "Install package"
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
       remove_package $PACKAGE
       echo "Set udev rule"
@@ -242,7 +241,6 @@ function remove_package() {
   remove_systemd $PACKAGE
   ## ros launch
   rm -f ros_launcher/launch_${PACKAGE}.sh*
-  exit 1
 }
 
 ###################################################
