@@ -156,7 +156,12 @@ function install_package() {
     done
     echo
     PACKAGE=${1}
-    echo $PACKAGE
+    cat <<_EOT_
+  Install package to acsl project
+    PROJECT : $PROJECT
+    ROS DOMAIN ID : $RID
+    PACKAGE : $1
+_EOT_ 
     if [[ $OPT_FLAG_L = 1 ]]; then
       if [[ -f $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh ]]; then
         cp -p $ACSL_ROS2_DIR/1_docker/common/ros_launcher/launch_$PACKAGE.sh launch_sample.sh
@@ -226,7 +231,6 @@ function remove_package() {
 # Main part
 ###################################################
 source ~/.bashrc
-echo $ORGPATH
 case ${1} in
 "init")
   if [ $# -eq 3 ]; then
