@@ -257,11 +257,11 @@ case ${1} in
 
     echo "Delete project file"
     cd $ACSL_ROS2_DIR/../
-    rm -f project_launch.sh project_launch.service
+    rm -fr project_launch.sh project_launch.service ros_launch
     
     # udev 登録解除
     echo "Deactivate udev"
-    rm -f *.rules
+    rm -f *.rules .rules
     sudo rm -f /etc/udev/rules.d/90-custom.rules
     sudo udevadm control --reload-rules
     sudo udevadm trigger
