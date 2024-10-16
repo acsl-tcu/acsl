@@ -385,9 +385,9 @@ case ${1} in
     
     # systemd 登録解除
     echo "Unload systemd"
-    sudo rm /etc/systemd/system/project_launch.service
     sudo systemctl stop project_launch
     sudo systemctl daemon-reload
+    sudo rm /etc/systemd/system/project_launch.service
     # .acsl 削除
     echo "Delete .acsl"
     rm -fr .acsl .install
