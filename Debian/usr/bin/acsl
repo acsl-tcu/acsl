@@ -374,11 +374,11 @@ case ${1} in
 
     echo "Delete project file"
     cd $ACSL_ROS2_DIR/../
-    rm -fr project_launch.sh project_launch.service ros_launch
+    rm -fr $ACSL_WORK_DIR/project_launch.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/ros_launcher
     
     # udev 登録解除
     echo "Deactivate udev"
-    rm -f $PROJECT.rules .rules
+    rm -f $ACSL_WORK_DIR/$PROJECT.rules $ACSL_WORK_DIR/.rules
     sudo rm -f /etc/udev/rules.d/90-custom.rules
     sudo udevadm control --reload-rules
     sudo udevadm trigger
@@ -390,9 +390,9 @@ case ${1} in
     sudo rm /etc/systemd/system/project_launch.service
     # .acsl 削除
     echo "Delete .acsl"
-    rm -fr .acsl .install
-    rm -fr LICENSE .gitignore 
-    rm -fr ros_launcher ros_packages .git .github
+    rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
+    rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/.gitignore 
+    rm -fr $ACSL_WORK_DIR/ros_packages $ACSL_WORK_DIR/.git $ACSL_WORK_DIR/.github
   fi
   ;;
 esac
