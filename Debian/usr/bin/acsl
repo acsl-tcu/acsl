@@ -391,7 +391,8 @@ case ${1} in
     # .acsl 削除
     echo "Delete .acsl"
     rm -fr .acsl .install
-    rm -fr LICENSE ros_packages ros_launch
+    rm -fr LICENSE .gitignore 
+    rm -fr ros_launcher ros_packages .git .github
   fi
   ;;
 esac
