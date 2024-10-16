@@ -255,13 +255,21 @@ _EOT_
 
     echo "### $PACKAGE ###" >>${PROJECT}.rules
 
+    # update package_list
     cd $ACSL_WORK_DIR/.install/main
     git fetch
     package_list=($(git branch -a|grep remote | grep -v HEAD |grep -v main| sed -e "s|remotes/origin/||g"))
     cd $ACSL_WORK_DIR
 
+
     if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
-      git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
+      if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
+        cd $ACSL_WORK_DIR/.install/$PACKAGE
+        git pull
+        cd $ACSL_WORK_DIR
+      else
+        git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
+      fi 
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_packages/* $ACSL_WORK_DIR/ros_packages/
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
@@ -284,8 +292,9 @@ _EOT_
       if [[ -n "$tmp" ]];then
         cp -rp $ACSL_ROS2_DIR/ros_launcher/launch_$PACKAGE* $ACSL_WORK_DIR/ros_launcher/
       else
+        source $ACSL_ROS2_DIR/1_docker/common/scripts/super_echo
         touch ./ros_launcher/launch_$PACKAGE.sh
-        echo "Modify ./ros_launcher/launch_$PACKAGE.sh"
+        recho "Modify ./ros_launcher/launch_$PACKAGE.sh"
       fi
       if [[ $OPT_FLAG_l = 1 ]]; then
         ROS_LAUNCH=$(ls -v ./ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')

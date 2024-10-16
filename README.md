@@ -8,7 +8,7 @@ sudo dpkg -i acsl_1.0_all.deb
 rm -f acsl_1.0_all.deb
 ```
 
-## Uninstall 
+### Uninstall 
 ```bash
 sudo dpkg -r acsl
 ```
@@ -20,7 +20,7 @@ sudo dpkg -r acsl
   cd work_dir
   acsl init PROJECT RID
 ```
-PROJECT(string) : project name<br>
+PROJECT(string) : project name<br />
 RID(integer) : ros domain id
 
 ### clean
@@ -32,13 +32,33 @@ Caution : All changes will be removed.
 ```
 
 ### install package
-
+Install a package
 ```bash
-  acsl install PACKAGE
+  acsl install PACKAGE RUN_ARGS
 ```
-PACKAGE : [package name]()
-
+PACKAGE : package name is equal to the branch name of [ros_package](https://github.com/acsl-tcu/ros_package)<br />
+RUN_ARGS : arguments to run launch_PACKAGE.sh<br />
+inside the program following command called
+```bash
+  launch_PACKAGE.sh RUN_ARGS
+```
 ### remove
+Remove a package
+```bash
+  acsl remove PACKAGE
+```
+
+## STRUCTURE of PROJECT
+PROJECT is a group of PACKAGEs.
+
+PACKAGE consists of followings
+```
+WORK_DIR/
+  |- ros_packages/
+  |- ros_launcher/launch_PACKAGE.sh
+  |- dockerfile.PACKAGE
+  |- PACKAGE.rules
+```
 
 ## Maintenance
 ```bash
