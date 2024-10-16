@@ -390,8 +390,8 @@ case ${1} in
     sudo systemctl daemon-reload
     # .acsl 削除
     echo "Delete .acsl"
-    rm -fr .*
-    rm -fr *
+    rm -fr .acsl .install
+    rm -fr LICENSE ros_packages ros_launch
   fi
   ;;
 esac
