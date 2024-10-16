@@ -378,7 +378,7 @@ case ${1} in
     
     # udev 登録解除
     echo "Deactivate udev"
-    rm -f *.rules .rules
+    rm -f $PROJECT.rules .rules
     sudo rm -f /etc/udev/rules.d/90-custom.rules
     sudo udevadm control --reload-rules
     sudo udevadm trigger
