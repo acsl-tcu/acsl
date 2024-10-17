@@ -69,10 +69,12 @@ _EOT_
   if [[ ! -d 2_ros_packages ]];then 
     mkdir 2_ros_packages
   fi
-  for i in $(ls dockerfile.*) ; do 
-    dockerfile_dpull $i
-  done
-  bash
+  if [[ -d 3_dockerfiles ]];then
+    for i in $(ls 3_dockerfiles/dockerfile.*) ; do 
+      dockerfile_dpull $i
+    done
+  fi
+#  bash
 }
 
 #############################################################
