@@ -12,7 +12,7 @@ function initialize_project() {
     ROS DOMAIN ID : $RID
 _EOT_
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
-    source ~/.bashrc
+    source ./.acsl/bashrc
   else
     cfs=$(ls .)
     if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
@@ -33,7 +33,7 @@ _EOT_
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
   
-  source ~/.bashrc
+  source $ACSL_ROS2_DIR/bashrc
   echo "After setup_bashrc    $ACSL_ROS2_DIR"
   if [[ ! -f $PROJECT.rules ]]; then
     rule_file="default.rules"
@@ -335,7 +335,7 @@ function remove_package() {
   ## systemd
   remove_systemd $PACKAGE
   ## ros launch
-  source ~/.bashrc
+  source $ACSL_ROS2_DIR/bashrc
   rm -fr $ACSL_WORK_DIR/ros_launcher/launch_${PACKAGE}*
   ## ros package
   rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
@@ -346,7 +346,7 @@ function remove_package() {
 ###################################################
 # Main part
 ###################################################
-source ~/.bashrc
+source $ACSL_ROS2_DIR/bashrc  
 echo $ACSL_ROS2_DIR
 case ${1} in
 "init")
@@ -379,7 +379,8 @@ case ${1} in
   if [[ -v ORGPATH ]]; then
     export PATH="$ORGPATH"
     echo "Delete after ORGPATH line"
-    sed -i '/ORGPATH/,$d' ~/.bashrc
+    #sed -i '/ORGPATH/,$d' ~/.bashrc
+    rm -f $ACSL_ROS2_DIR/bashrc
 
     echo "Delete project file"
     cd $ACSL_WORK_DIR
