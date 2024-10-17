@@ -26,9 +26,9 @@ _EOT_
     echo "create .acsl folder"
     git clone git@github.com:acsl-tcu/ros2.git .acsl
     chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
-    chmod -R a+x $ACSL_ROS2_DIR/3_docker/common/scripts
+    chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
   fi
-  source $ACSL_ROS2_DIR/3_docker/common/scripts/super_echo
+  source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
@@ -240,8 +240,8 @@ _EOT_
       fi
     fi
     if [[ $OPT_FLAG_D = 1 ]]; then
-      if [[ -f $ACSL_ROS2_DIR/3_docker/dockerfiles/dockerfile.$PACKAGE ]]; then
-        cp -p $ACSL_ROS2_DIR/3_docker/dockerfiles/dockerfile.$PACKAGE dockerfile.sample
+      if [[ -f $ACSL_ROS2_DIR/4_docker/dockerfiles/dockerfile.$PACKAGE ]]; then
+        cp -p $ACSL_ROS2_DIR/4_docker/dockerfiles/dockerfile.$PACKAGE dockerfile.sample
         echo "sample docker file \"./dockerfile.sample\" is generated."
       else
         echo "No default docker file exists."
@@ -301,7 +301,7 @@ _EOT_
       if [[ -n "$tmp" ]];then
         cp -rp $ACSL_ROS2_DIR/1_ros_launcher/launch_$PACKAGE* $ACSL_WORK_DIR/1_ros_launcher/
       else
-        source $ACSL_ROS2_DIR/3_docker/common/scripts/super_echo
+        source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
         touch ./1_ros_launcher/launch_$PACKAGE.sh
         recho "Modify ./1_ros_launcher/launch_$PACKAGE.sh"
       fi
