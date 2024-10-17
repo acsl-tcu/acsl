@@ -54,8 +54,8 @@ PROJECT is a group of PACKAGEs.
 PACKAGE consists of followings
 ```
 WORK_DIR/
-  |- ros_packages/
-  |- ros_launcher/launch_PACKAGE.sh
+  |- 2_ros_packages/
+  |- 1_ros_launcher/launch_PACKAGE.sh
   |- dockerfile.PACKAGE
   |- PACKAGE.rules
 ```
