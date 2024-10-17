@@ -347,8 +347,8 @@ function remove_package() {
 # Main part
 ###################################################
 if [[ -v ACSL_ROS2_DIR ]]; then
-  source $ACSL_ROS2_DIR/bashrc  
   echo $ACSL_ROS2_DIR
+  source $ACSL_ROS2_DIR/bashrc  
 fi
 case ${1} in
 "init")
