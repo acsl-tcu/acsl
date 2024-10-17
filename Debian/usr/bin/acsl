@@ -16,18 +16,17 @@ _EOT_
   else
     cfs=$(ls .)
     if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
-      git clone git@github.com:acsl-tcu/$PROJECT
+      git clone git@github.com:acsl-tcu/project_$PROJECT
       cd $PROJECT
     else
-      git clone git@github.com:acsl-tcu/$PROJECT .
+      git clone git@github.com:acsl-tcu/project_$PROJECT .
     fi
+    ACSL_WORK_DIR="$(pwd)"
     ACSL_ROS2_DIR="$(pwd)/.acsl"
     echo "create .acsl folder"
-    #git clone https://github.com/acsl-tcu/ros2.git .acsl
     git clone git@github.com:acsl-tcu/ros2.git .acsl
     chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
     chmod -R a+x $ACSL_ROS2_DIR/1_docker/common/scripts
-    ACSL_WORK_DIR="$(pwd)"
   fi
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
