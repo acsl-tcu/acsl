@@ -380,6 +380,7 @@ case ${1} in
     update_tag_list
   ;;
 "clean")
+  cd $ACSL_WORK_DIR
   if [[ -v ORGPATH ]]; then
     export PATH="$ORGPATH"
     echo "Delete after ORGPATH line"
