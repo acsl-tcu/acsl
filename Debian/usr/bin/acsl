@@ -17,7 +17,7 @@ _EOT_
     cfs=$(ls .)
     if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
       git clone git@github.com:acsl-tcu/project_$PROJECT
-      cd $PROJECT
+      cd project_$PROJECT
     else
       git clone git@github.com:acsl-tcu/project_$PROJECT .
     fi
