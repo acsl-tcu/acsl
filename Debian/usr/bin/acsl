@@ -68,8 +68,10 @@ _EOT_
 
   if [[ ! -d ros_packages ]];then 
     mkdir ros_packages
-  fi  
-  dpull_check_tag image_$PROJECT
+  fi
+  for i in $(ls dockerfile.*) ; do 
+    dockerfile_dpull $i
+  done
   bash
 }
 
@@ -160,7 +162,14 @@ function dpull_check_tag(){
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep $tag)
   if [[ -n res ]]; then
     $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag    
+  else
+    recho "Not found the image with $tag\n Request update tag list"
   fi
+}
+
+function dockerfile_dpull(){
+  TAG=${1#dockerfile.}
+  dpull_check_tag $TAG
 }
 
 function install_package() {
@@ -274,7 +283,7 @@ _EOT_
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/ros_launcher/* $ACSL_WORK_DIR/ros_launcher/
       if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
-        $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $PACKAGE
+        dpull_check_tag $PACKAGE
       fi
     fi
 
@@ -373,7 +382,7 @@ case ${1} in
     sed -i '/ORGPATH/,$d' ~/.bashrc
 
     echo "Delete project file"
-    cd $ACSL_ROS2_DIR/../
+    cd $ACSL_WORK_DIR
     rm -fr $ACSL_WORK_DIR/project_launch.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/ros_launcher
     
     # udev 登録解除
@@ -393,6 +402,7 @@ case ${1} in
     rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
     rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/.gitignore 
     rm -fr $ACSL_WORK_DIR/ros_packages $ACSL_WORK_DIR/.git $ACSL_WORK_DIR/.github
+    rm -f dockerfile.*
   fi
   ;;
 esac
