@@ -28,6 +28,7 @@ _EOT_
     chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
     chmod -R a+x $ACSL_ROS2_DIR/1_docker/common/scripts
   fi
+  source $ACSL_ROS2_DIR/1_docker/common/scripts/super_echo
   #cd $ACSL_ROS2_DIR/0_host_commands
   #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
