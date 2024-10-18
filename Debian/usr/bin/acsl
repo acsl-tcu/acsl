@@ -6,6 +6,11 @@
 function initialize_project() {
   PROJECT=$1
   RID=$2
+  if [[ $# -eq 3 ]];then 
+    TARGET=_$3 # means : ${PROJECT}${TARGET} = $1_$3
+  else
+    TARGET=""
+  fi
   cat <<_EOT_
   Initialize acsl project
     PROJECT : $PROJECT
@@ -35,7 +40,11 @@ _EOT_
   
   source $ACSL_ROS2_DIR/bashrc
   echo "After setup_bashrc    $ACSL_ROS2_DIR"
-  if [[ ! -f $PROJECT.rules ]]; then
+
+  ###########################################
+  ## New project
+  ###########################################
+  if [[ ! -f ${PROJECT}${TARGET}.rules ]]; then
     rule_file="default.rules"
     tmp=$(uname -a | grep "raspberrypi")
     if [[ -n $tmp ]]; then
@@ -58,19 +67,20 @@ _EOT_
   if [[ ! -f project_launch.sh ]]; then
     cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
   fi
-  sed -i "s|homedir|$HOME|g" project_launch.sh
-  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_ROS2_DIR/../project_launch.sh
-  chmod a+x project_launch.sh
   if [[ ! -d 1_ros_launcher ]];then 
     mkdir 1_ros_launcher
   fi
-  chmod -R a+x 1_ros_launcher
-
   if [[ ! -d 2_ros_packages ]];then 
     mkdir 2_ros_packages
   fi
-  if [[ -d 3_dockerfiles ]];then
-    for i in $(ls 3_dockerfiles/dockerfile.*) ; do 
+  #############################################
+
+  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  chmod a+x project_launch${TARGET}.sh
+  chmod -R a+x 1_ros_launcher
+
+  if [[ -d 3_dockerfiles${TARGET} ]];then
+    for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
       dockerfile_dpull $i
     done
   fi
