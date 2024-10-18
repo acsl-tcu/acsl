@@ -406,7 +406,7 @@ case ${1} in
     
     # udev 登録解除
     echo "Deactivate udev"
-    rm -f $ACSL_WORK_DIR/$PROJECT.rules $ACSL_WORK_DIR/.rules
+    rm -f $ACSL_WORK_DIR/$PROJECT*.rules $ACSL_WORK_DIR/.rules
     sudo rm -f /etc/udev/rules.d/90-custom.rules
     sudo udevadm control --reload-rules
     sudo udevadm trigger
@@ -419,7 +419,7 @@ case ${1} in
     # .acsl 削除
     echo "Delete .acsl"
     rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
-    rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.gitignore $ACSL_WORK_DIR/.git $ACSL_WORK_DIR/.github
+    rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
     rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles
   fi
   ;;
