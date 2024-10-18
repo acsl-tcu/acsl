@@ -77,8 +77,9 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   chmod a+x project_launch${TARGET}.sh
   chmod -R a+x 1_ros_launcher
-  $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
-
+  if [[ -f ${PROJECT}${TARGET}.rules ]];then 
+    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+  fi
   if [[ -d 3_dockerfiles${TARGET} ]];then
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
       dockerfile_dpull $i
@@ -295,6 +296,7 @@ _EOT_
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_ros_launcher/* $ACSL_WORK_DIR/1_ros_launcher/
       if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
+        cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} .
         dpull_check_tag $PACKAGE
       fi
     fi
@@ -302,12 +304,13 @@ _EOT_
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
 
       echo "Set udev rule"
-      if [[ $OPT_FLAG_r = 1 ]]; then
-        cat ${OPT_VALUE_r} >>${PROJECT}.rules
+      if [[ -f ${PROJECT}.rules ]];then 
+        if [[ $OPT_FLAG_r = 1 ]]; then
+          cat ${OPT_VALUE_r} >>${PROJECT}.rules
+        fi
+        echo "### $PACKAGE END ###" >>${PROJECT}.rules
+        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
       fi
-      echo "### $PACKAGE END ###" >>${PROJECT}.rules
-      $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
-  
       echo "Set ros launch"
       tmp=$(ls $ACSL_ROS2_DIR/1_ros_launcher | grep launch_$PACKAGE)
       if [[ -n "$tmp" ]];then
@@ -333,7 +336,7 @@ _EOT_
     fi
 
   else
-    echo "initialize first"
+    recho "initialize first by run : acsl init PROJECT RID"
   fi
   exit 1
 }
@@ -364,7 +367,7 @@ if [[ -v "$ACSL_ROS2_DIR" ]]; then
 fi
 case ${1} in
 "init")
-  if [ $# -eq 3 ]; then
+  if [ $# -ge 3 ]; then
     initialize_project ${@:2:($# - 1)}
   else
     echo "Usage : acsl init project_name ros_domain_id"

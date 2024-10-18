@@ -54,14 +54,47 @@ PROJECT is a group of PACKAGEs.
 PACKAGE consists of followings
 ```
 WORK_DIR/
+  |- 1_ros_launcher/
+    |- launch_PACKAGE.sh
   |- 2_ros_packages/
-  |- 1_ros_launcher/launch_PACKAGE.sh
-  |- dockerfile.PACKAGE
+  |- 3_dockerfiles/
+    |- dockerfile.PACKAGE
   |- PACKAGE.rules
+  |- project_launch.sh
 ```
 
-## Maintenance
+## For developer
+
+### New project
+```bash
+  acsl project_name project_RID
+```
+Write several files
+
+### Create/Update docker image
+Make *dockerfile.PACKAGE* and ask to build the image by sending it to ACSL manager.
+
+## For ACSL manager : Maintenance
 ```bash
   acsl/Debian> md5sum usr/bin/acsl | tee DEBIAN/md5sums
   acsl> fakeroot dpkg-deb --build Debian .
+```
+
+### Docker image
+```bash
+git clone git@PROJECT.git
+cd PROJECT
+export PROJECT=PROJECT
+```
+For project image
+```bash
+bsbuild
+build_project (ros_packages)
+dpush image_PROJECT
+```
+
+For package image : check its versatility first.
+```bash
+bsbuild base PACKAGE build
+dpush PACKAGE
 ```
