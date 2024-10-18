@@ -4,16 +4,17 @@
 ## Initilize
 ##############################################
 function initialize_project() {
-  PROJECT=$1
-  RID=$2
   if [[ $# -eq 3 ]];then 
-    TARGET=_$3 # means : ${PROJECT}${TARGET} = $1_$3
+    TARGET=_$3  #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
   else
     TARGET=""
   fi
+  PROJECT=${1}
+  RID=$2
   cat <<_EOT_
   Initialize acsl project
     PROJECT : $PROJECT
+    TARGET : $TARGET
     ROS DOMAIN ID : $RID
 _EOT_
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
@@ -21,10 +22,10 @@ _EOT_
   else
     cfs=$(ls .)
     if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
-      git clone git@github.com:acsl-tcu/project_$PROJECT
-      cd project_$PROJECT
+      git clone git@github.com:acsl-tcu/project_${PROJECT}
+      cd project_${PROJECT}
     else
-      git clone git@github.com:acsl-tcu/project_$PROJECT .
+      git clone git@github.com:acsl-tcu/project_${PROJECT} .
     fi
     ACSL_WORK_DIR="$(pwd)"
     ACSL_ROS2_DIR="$(pwd)/.acsl"
@@ -34,12 +35,10 @@ _EOT_
     chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
   fi
   source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
-  #cd $ACSL_ROS2_DIR/0_host_commands
-  #bash ./setup.sh $1 $2
   $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
   
   source $ACSL_ROS2_DIR/bashrc
-  echo "After setup_bashrc    $ACSL_ROS2_DIR"
+  echo "After setup_bashrc $ACSL_ROS2_DIR"
 
   ###########################################
   ## New project
@@ -61,7 +60,7 @@ _EOT_
       rule_file="default.rules"
       echo $rule_file
     fi
-    cp -p $ACSL_ROS2_DIR/rules/$rule_file ./$PROJECT.rules
+    cp -p $ACSL_ROS2_DIR/rules/$rule_file ./${PROJECT}${TARGET}.rules
   fi
 
   if [[ ! -f project_launch.sh ]]; then
@@ -78,6 +77,7 @@ _EOT_
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   chmod a+x project_launch${TARGET}.sh
   chmod -R a+x 1_ros_launcher
+  $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
 
   if [[ -d 3_dockerfiles${TARGET} ]];then
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
