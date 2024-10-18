@@ -63,7 +63,7 @@ _EOT_
     cp -p $ACSL_ROS2_DIR/rules/$rule_file ./${PROJECT}${TARGET}.rules
   fi
 
-  if [[ ! -f project_launch.sh ]]; then
+  if [[ ! -f project_launch${TARGET}.sh ]]; then
     cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
   fi
   if [[ ! -d 1_ros_launcher ]];then 
