@@ -14,7 +14,9 @@ sudo dpkg -r acsl
 ```
 
 ## Usage
-
+- Register your SSH key to Github desktop
+- [Install docker](https://github.com/acsl-tcu/ros2?tab=readme-ov-file#setup)
+  
 ### init
 ```bash
   cd work_dir
