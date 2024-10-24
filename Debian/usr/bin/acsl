@@ -74,7 +74,6 @@ _EOT_
   fi
   #############################################
 
-  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   chmod a+x project_launch${TARGET}.sh
   chmod -R a+x 1_ros_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
@@ -85,6 +84,7 @@ _EOT_
       dockerfile_dpull $i
     done
   fi
+  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   bash
 }
 
