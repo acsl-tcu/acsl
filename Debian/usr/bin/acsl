@@ -296,8 +296,8 @@ _EOT_
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
       cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
       cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_ros_launcher/* $ACSL_WORK_DIR/1_ros_launcher/
-      if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} ]];then 
-        cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfile.${PACKAGE} .
+      if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]];then 
+        cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles/
         dpull_check_tag $PACKAGE
       fi
     fi
