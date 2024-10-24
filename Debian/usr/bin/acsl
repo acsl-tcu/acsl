@@ -131,30 +131,39 @@ function printOptions() {
   echo
 }
 
+function set_udev() {
+  if [[ -f ${1} ]]; then
+    echo "### $PACKAGE ###" >>${PROJECT}${TARGET}.rules
+    cat ${1} >>${PROJECT}${TARGET}.rules
+    echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
+    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+  fi
+}
+
 function remove_udev() {
   echo "Remove udev"
   PACKAGE=$1
-  TARGET=$PROJECT.rules
+  UDEV_TARGET=${PROJECT}${TARGET}.rules
   RULES="### $PACKAGE ###"
   RULEE="### $PACKAGE END ###"
   # 文字列Aが含まれる行の行数を取得
-  lines=($(grep -n "$RULES" "$TARGET" | cut -d: -f1))
-  linee=($(grep -n "$RULEE" "$TARGET" | cut -d: -f1))
+  lines=($(grep -n "$RULES" "$UDEV_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$RULEE" "$UDEV_TARGET" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -i -e "${lines},${linee}d" $TARGET
+    sed -i -e "${lines},${linee}d" $UDEV_TARGET
   fi
 }
 function remove_systemd() {
   echo "Remove systemd"
   PACKAGE=$1
-  TARGET=project_launch.sh
+  SYSD_TARGET=project_launch${TARGET}.sh
   LAUNCHS="### $PACKAGE ###"
   LAUNCHE="### $PACKAGE END ###"
   # 文字列Aが含まれる行の行数を取得
-  lines=($(grep -n "$LAUNCHS" "$TARGET" | cut -d: -f1))
-  linee=($(grep -n "$LAUNCHE" "$TARGET" | cut -d: -f1))
+  lines=($(grep -n "$LAUNCHS" "$SYSD_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$LAUNCHE" "$SYSD_TARGET" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -i -e "${lines},${linee}d" $TARGET
+    sed -i -e "${lines},${linee}d" $SYSD_TARGET
   fi
 }
 
@@ -265,78 +274,67 @@ _EOT_
     ####################################
     ##  Install package main
     ####################################
-    ## udev.rule
-    remove_udev $PACKAGE
-    ## systemd
-    remove_systemd $PACKAGE
-    if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
-      mkdir $ACSL_WORK_DIR/.install
-      cd $ACSL_WORK_DIR/.install
-      git clone git@github.com:acsl-tcu/ros_package main
-      cd -
-    fi
-
-    echo "### $PACKAGE ###" >>${PROJECT}.rules
-
-    # update package_list
-    cd $ACSL_WORK_DIR/.install/main
-    git fetch
-    package_list=($(git branch -a|grep remote | grep -v HEAD |grep -v main| sed -e "s|remotes/origin/||g"))
-    cd $ACSL_WORK_DIR
-
-
-    if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
-      if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
-        cd $ACSL_WORK_DIR/.install/$PACKAGE
-        git pull
-        cd $ACSL_WORK_DIR
-      else
-        git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
-      fi 
-      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
-      cat $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules >>${PROJECT}.rules
-      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_ros_launcher/* $ACSL_WORK_DIR/1_ros_launcher/
-      if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} ]];then 
-        cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
-        dpull_check_tag $PACKAGE
-      fi
-    fi
-
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
+      if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
+        mkdir $ACSL_WORK_DIR/.install
+        cd $ACSL_WORK_DIR/.install
+        git clone git@github.com:acsl-tcu/ros_package main
+        cd -
+      fi
+      # update package_list
+      cd $ACSL_WORK_DIR/.install/main
+      git fetch
+      package_list=($(git branch -a|grep remote | grep -v HEAD |grep -v main| sed -e "s|remotes/origin/||g"))
+      cd $ACSL_WORK_DIR
 
-      echo "Set udev rule"
-      if [[ -f ${PROJECT}${TARGET}.rules ]];then 
+      if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
+        ## udev.rule
+        remove_udev $PACKAGE
+        ## systemd
+        remove_systemd $PACKAGE
+
+        if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
+          cd $ACSL_WORK_DIR/.install/$PACKAGE
+          git pull
+          cd $ACSL_WORK_DIR
+        else
+          git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
+        fi 
+
+        echo "Set udev rule"
         if [[ $OPT_FLAG_r = 1 ]]; then
-          cat ${OPT_VALUE_r} >>${PROJECT}${TARGET}.rules
+          set_udev ${OPT_VALUE_r} 
+        else
+          set_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
         fi
-        echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
-        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
-      fi
-      echo "Set ros launch"
-      tmp=$(ls $ACSL_ROS2_DIR/1_ros_launcher | grep launch_$PACKAGE)
-      if [[ -n "$tmp" ]];then
-        cp -rp $ACSL_ROS2_DIR/1_ros_launcher/launch_$PACKAGE* $ACSL_WORK_DIR/1_ros_launcher/
+
+
+        echo "Set ros launch"
+        if [[ $OPT_FLAG_l = 1 ]]; then
+          ROS_LAUNCH=$(ls -v ./1_ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
+          LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
+          cp ${OPT_VALUE_l} ./1_ros_launcher/$LAUNCH_FILE_NAME
+        else
+          cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_ros_launcher/* $ACSL_WORK_DIR/1_ros_launcher/
+        fi
+        chmod -R a+x ./1_ros_launcher
+
+        echo "Install ROS package"
+        cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+
+        if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} ]];then 
+          echo "Pull Docker image : dockerfile.${PACKAGE}"
+          cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
+          dpull_check_tag $PACKAGE
+        fi
+
+        echo "set project_launch${TARGET}.sh"
+        echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
+        echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
+        echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
+
       else
-        source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
-        touch ./1_ros_launcher/launch_$PACKAGE.sh
-        recho "Modify ./1_ros_launcher/launch_$PACKAGE.sh"
-      fi
-      if [[ $OPT_FLAG_l = 1 ]]; then
-        ROS_LAUNCH=$(ls -v ./1_ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
-        LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
-        cp ${OPT_VALUE_l} ./1_ros_launcher/$LAUNCH_FILE_NAME
-      fi
-      chmod -R a+x ./1_ros_launcher
-
-      echo "set project_launch${TARGET}.sh"
-      echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
-      echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
-      echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
-
-      if [[ -d 3_dockerfiles${TARGET} ]];then
-        for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
-          dockerfile_dpull $i
-        done
+        recho "make package first as a branch on 'ros_package' repo"
       fi
 
     fi
