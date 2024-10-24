@@ -319,12 +319,14 @@ _EOT_
         fi
         chmod -R a+x ./1_ros_launcher
 
-        echo "Install ROS package"
-        cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+        if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
+          echo "Install ROS package"
+          cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+        fi
 
-        if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} ]];then 
+        if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]];then 
           echo "Pull Docker image : dockerfile.${PACKAGE}"
-          cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles${TARGET}/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
+          cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
           dpull_check_tag $PACKAGE
         fi
 
