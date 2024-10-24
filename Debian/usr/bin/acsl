@@ -305,12 +305,12 @@ _EOT_
     if [ "$OPT_FLAG_L" != 1 -a "$OPT_FLAG_R" != 1 -a "$OPT_FLAG_D" != 1 ]; then
 
       echo "Set udev rule"
-      if [[ -f ${PROJECT}.rules ]];then 
+      if [[ -f ${PROJECT}${TARGET}.rules ]];then 
         if [[ $OPT_FLAG_r = 1 ]]; then
-          cat ${OPT_VALUE_r} >>${PROJECT}.rules
+          cat ${OPT_VALUE_r} >>${PROJECT}${TARGET}.rules
         fi
-        echo "### $PACKAGE END ###" >>${PROJECT}.rules
-        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}.rules
+        echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
+        $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
       fi
       echo "Set ros launch"
       tmp=$(ls $ACSL_ROS2_DIR/1_ros_launcher | grep launch_$PACKAGE)
@@ -328,12 +328,17 @@ _EOT_
       fi
       chmod -R a+x ./1_ros_launcher
 
-      echo "set project_launch.sh"
-      echo "### $PACKAGE ###" >>project_launch.sh
-      echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch.sh
-      echo "### $PACKAGE END ###" >>project_launch.sh
+      echo "set project_launch${TARGET}.sh"
+      echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
+      echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
+      echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
 
-      #dpull_check_tag $PACKAGE
+      if [[ -d 3_dockerfiles${TARGET} ]];then
+        for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
+          dockerfile_dpull $i
+        done
+      fi
+
     fi
 
   else
@@ -421,7 +426,7 @@ case ${1} in
     echo "Delete .acsl"
     rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
     rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
-    rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles
+    rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
   fi
   ;;
 esac
