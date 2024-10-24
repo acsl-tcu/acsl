@@ -159,12 +159,13 @@ function remove_systemd() {
 }
 
 function update_tag_list(){
+  # function to update tag_list file in $ACSL_ROS2_DIR
   cd $ACSL_ROS2_DIR
   git checkout .
   res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
-  res=(${res//,/}) >> $ACSL_ROS2_DIR/tag_list
+  echo ${res//,/} >> $ACSL_ROS2_DIR/tag_list
   git add .
   git commit -m "update tag_list"
   git push
@@ -172,7 +173,7 @@ function update_tag_list(){
 
 function dpull_check_tag(){
   tag=$1
-  res=$(cat $ACSL_ROS2_DIR/tag_list | grep $tag)
+  res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
   if [[ -n res ]]; then
     $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag    
   else
