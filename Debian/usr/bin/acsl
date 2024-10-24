@@ -233,7 +233,7 @@ function install_package() {
     cat <<_EOT_
   Install package to acsl project
     PROJECT : $PROJECT
-    ROS DOMAIN ID : $RID
+    ROS DOMAIN ID : $ROS_DOMAIN_ID
     PACKAGE : $1
 _EOT_
     if [[ $OPT_FLAG_L = 1 ]]; then
