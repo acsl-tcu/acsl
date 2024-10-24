@@ -335,6 +335,7 @@ _EOT_
         echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
         echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
 
+        $ACSL_ROS2_DIR/0_host_commands/scripts/dup all
       else
         recho "make package first as a branch on 'ros_package' repo"
       fi
