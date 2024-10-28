@@ -376,7 +376,7 @@ if [[ -v "$ACSL_ROS2_DIR" ]]; then
 fi
 case ${1} in
 "init")
-  if [ $# -ge 3 -a [ -d .acsl ]]; then
+  if [[ $# -ge 3 ] -a [ -d .acsl ]]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
     source .acsl/bashrc
