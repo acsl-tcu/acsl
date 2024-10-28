@@ -21,11 +21,10 @@ _EOT_
     source ./.acsl/bashrc
   else
     cfs=$(ls .)
-    if [[ -n $cfs ]];then # 空フォルダの場合はそこを作業フォルダに
-      git clone git@github.com:acsl-tcu/project_${PROJECT}
-      cd project_${PROJECT}
-    else
+    if [[ -z $cfs ]];then 
       git clone git@github.com:acsl-tcu/project_${PROJECT} .
+    else
+      exit
     fi
     ACSL_WORK_DIR="$(pwd)"
     ACSL_ROS2_DIR="$(pwd)/.acsl"
@@ -367,41 +366,26 @@ function remove_package() {
 }
 
 
-###################################################
-function update_project(){
-  source .acsl/bashrc
-  if [ $# -ge 1 ];then 
-    if [ $PROJECT == $1 ];then
-      PROJECT=$1
-    else
-      recho "Do you mean to switch the project?
-In this case, you need to clean the project first by
-> acsl clean"
-    fi
-  fi
-  if [ $# -ge 2 ];then
-    ROS_DOMAIN_ID=$2
-  fi
-  if [ $# -ge 3 ];then
-    TARGET=$3
-  fi
-  git checkout .
-  echo "git pull"
-  git pull
-  chmod a+x 
-  chmod a+x project_launch${TARGET}.sh
-  chmod -R a+x 1_ros_launcher
-#  initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
+##################################################
+function git_pull() {
+  $ACSL_ROS2_DIR/4_docker/common/scripts/gpull $1
+}
+function colcon_build() {
+  $ACSL_ROS2_DIR/0_host_commands/scripts/build_project $@
+}
+function docker_push() {
+  $ACSL_ROS2_DIR/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
 }
 ###################################################
 # Main part
 ###################################################
-if [[ -v "$ACSL_ROS2_DIR" ]]; then
-  echo $ACSL_ROS2_DIR
-  source $ACSL_ROS2_DIR/bashrc  
+if [[ -d .acsl ]];then 
+  echo "Load settings"
+  source .acsl/bashrc  
 fi
 case ${1} in
 "init")
+# acsl init PROJECT RID (TARGET)
   if [ $# -ge 3 ] && [[ -d .acsl ]]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
@@ -411,6 +395,8 @@ case ${1} in
   fi
   ;;
 "install")
+# acsl install package
+# To install package
   if [ $# -ge 2 ]; then
     echo "install packages : ${@:2:($# - 1)}"
     install_package ${@:2:($# - 1)}
@@ -419,6 +405,8 @@ case ${1} in
   fi
   ;;
 "remove")
+# acsl remove package_name
+# To remove package
   if [ $# -ge 2 ]; then
     echo "remove packages : ${@:2:($# - 1)}"
     remove_package ${@:2:($# - 1)}
@@ -427,18 +415,36 @@ case ${1} in
   fi
   ;;
 "update_tag_list")
-    update_tag_list
+# acsl update_tag_list 
+# run @ admin PC
+  update_tag_list
   ;;
 "update")
+# acsl update ros_packages
   if [[ -d .acsl ]];then 
     echo "Update project files from github"
-    source .acsl/bashrc  
-    update_project ${@:2:($# - 1)}
+    git_pull
+    colcon_build ${@:2:($# - 1)}
+    # update_project ${@:2:($# - 1)}
   else
     echo "Couldn't find project files. Move to the project folder."
   fi
   ;;
+"freeze")
+# acsl freeze (packages)
+# Update project folder, and rebuild and upload image_${PROJECT}${TARGET}
+  if [[ -v $ACSL_WORK_DIR ]]; then
+    echo "Update project folder, and rebuild and upload image_${PROJECT}${TARGET}"
+    git_pull
+    colcon_build ${@:2:($# - 1)}
+    docker_push
+  else
+    echo "I'm frozen ..."
+  fi
+  ;;
 "clean")
+# acsl clean
+# To clean up all
   cd $ACSL_WORK_DIR
   if [[ -v ORGPATH ]]; then
     export PATH="$ORGPATH"
