@@ -88,6 +88,7 @@ _EOT_
   bash
 }
 
+
 #############################################################
 # Package install
 #############################################################
@@ -365,6 +366,7 @@ function remove_package() {
   drmi $PACKAGE
 }
 
+
 ###################################################
 # Main part
 ###################################################
@@ -376,6 +378,12 @@ case ${1} in
 "init")
   if [ $# -ge 3 ]; then
     initialize_project ${@:2:($# - 1)}
+  elif [[ -d .acsl ]];then 
+    source $ACSL_ROS2_DIR/bashrc
+    if [ $# -eq 2 ];then 
+      PROJECT=$2
+    fi
+    initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
   else
     echo "Usage : acsl init project_name ros_domain_id"
   fi
