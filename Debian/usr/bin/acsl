@@ -386,7 +386,7 @@ fi
 case ${1} in
 "init")
 # acsl init PROJECT RID (TARGET)
-  if [ $# -ge 3 ] && [[ -d .acsl ]]; then
+  if [ $# -ge 3 ] && [ ! -d .acsl ]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
     update_project ${@:2:($# - 1)}
