@@ -376,13 +376,24 @@ if [[ -v "$ACSL_ROS2_DIR" ]]; then
 fi
 case ${1} in
 "init")
-  if [ $# -ge 3 ]; then
+  if [ $# -ge 3 -a [ -d .acsl ]]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
     source .acsl/bashrc
-    if [ $# -eq 2 ];then 
-      PROJECT=$2
-      gecho $PROJECT
+    if [ $# -ge 2 ];then 
+      if [ $PROJECT == $2 ];then
+        PROJECT=$2
+      else
+        recho "Do you mean to switch the project?
+  In this case, you need to clean the project first by
+  > acsl clean"
+      fi
+    fi
+    if [ $# -ge 3 ];then
+      ROS_DOMAIN_ID=$3
+    fi
+    if [ $# -ge 4 ];then
+      TARGET=$4
     fi
     initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
   else
