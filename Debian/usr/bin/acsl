@@ -368,6 +368,26 @@ function remove_package() {
 
 
 ###################################################
+function update_project(){
+  source .acsl/bashrc
+  if [ $# -ge 1 ];then 
+    if [ $PROJECT == $1 ];then
+      PROJECT=$1
+    else
+      recho "Do you mean to switch the project?
+In this case, you need to clean the project first by
+> acsl clean"
+    fi
+  fi
+  if [ $# -ge 2 ];then
+    ROS_DOMAIN_ID=$2
+  fi
+  if [ $# -ge 3 ];then
+    TARGET=$3
+  fi
+  initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
+}
+###################################################
 # Main part
 ###################################################
 if [[ -v "$ACSL_ROS2_DIR" ]]; then
@@ -379,23 +399,7 @@ case ${1} in
   if [ $# -ge 3 ] && [[ -d .acsl ]]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
-    source .acsl/bashrc
-    if [ $# -ge 2 ];then 
-      if [ $PROJECT == $2 ];then
-        PROJECT=$2
-      else
-        recho "Do you mean to switch the project?
-  In this case, you need to clean the project first by
-  > acsl clean"
-      fi
-    fi
-    if [ $# -ge 3 ];then
-      ROS_DOMAIN_ID=$3
-    fi
-    if [ $# -ge 4 ];then
-      TARGET=$4
-    fi
-    initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
+    update_project ${@:2:($# - 1)}
   else
     echo "Usage : acsl init project_name ros_domain_id"
   fi
@@ -418,6 +422,14 @@ case ${1} in
   ;;
 "update_tag_list")
     update_tag_list
+  ;;
+"update")
+  if [[ -d .acsl ]];then 
+    source .acsl/bashrc  
+    update_project ${@:2:($# - 1)}
+  else
+    echo "Couldn't find project files. Move to the project folder."
+  fi
   ;;
 "clean")
   cd $ACSL_WORK_DIR
