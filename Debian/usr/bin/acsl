@@ -385,7 +385,12 @@ In this case, you need to clean the project first by
   if [ $# -ge 3 ];then
     TARGET=$3
   fi
-  initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
+  git checkout .
+  git pull
+  chmod a+x 
+  chmod a+x project_launch${TARGET}.sh
+  chmod -R a+x 1_ros_launcher
+#  initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
 }
 ###################################################
 # Main part
