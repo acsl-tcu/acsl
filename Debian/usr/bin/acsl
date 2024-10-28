@@ -382,6 +382,7 @@ case ${1} in
     source .acsl/bashrc
     if [ $# -eq 2 ];then 
       PROJECT=$2
+      gecho $PROJECT
     fi
     initialize_project $PROJECT $ROS_DOMAIN_ID $TARGET
   else
