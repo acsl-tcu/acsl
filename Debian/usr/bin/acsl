@@ -5,7 +5,7 @@
 ##############################################
 function initialize_project() {
   if [[ $# -eq 3 ]];then 
-    TARGET=_$3  #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
+    TARGET=_${3#_}  #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
   else
     TARGET=""
   fi
