@@ -386,6 +386,7 @@ In this case, you need to clean the project first by
     TARGET=$3
   fi
   git checkout .
+  echo "git pull"
   git pull
   chmod a+x 
   chmod a+x project_launch${TARGET}.sh
@@ -430,6 +431,7 @@ case ${1} in
   ;;
 "update")
   if [[ -d .acsl ]];then 
+    echo "Update project files from github"
     source .acsl/bashrc  
     update_project ${@:2:($# - 1)}
   else
