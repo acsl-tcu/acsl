@@ -379,7 +379,7 @@ case ${1} in
   if [ $# -ge 3 ]; then
     initialize_project ${@:2:($# - 1)}
   elif [[ -d .acsl ]];then 
-    source $ACSL_ROS2_DIR/bashrc
+    source .acsl/bashrc
     if [ $# -eq 2 ];then 
       PROJECT=$2
     fi
