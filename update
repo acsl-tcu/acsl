@@ -1,0 +1,11 @@
+#! /bin/bash
+
+git pull
+cd Debian
+md5sum usr/bin/acsl | tee DEBIAN/md5sums
+cd ..
+fakeroot dpkg-deb --build Debian .
+sudo dpkg -i acsl_1.0_all.deb
+git add .
+git commit -m "update acsl command"
+git push
