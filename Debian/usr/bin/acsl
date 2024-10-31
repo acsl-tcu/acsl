@@ -481,7 +481,8 @@ case ${1} in
     git checkout -b $2
     git push -u origin $2
     echo "After setup the package, push to github."
-    echo "Then 
+    echo "Then install the package into your project."
+    echo "Build the docker image and dpush it."
   ;;
   *)
     cd ~/$1
