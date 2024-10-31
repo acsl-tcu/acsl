@@ -475,4 +475,8 @@ case ${1} in
     rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
   fi
   ;;
+  *)
+    cd $1
+    source .acsl/bashrc
+  ;;
 esac
