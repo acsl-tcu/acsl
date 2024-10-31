@@ -476,7 +476,7 @@ case ${1} in
   fi
   ;;
   *)
-    cd $1
+    cd ~/$1
     source .acsl/bashrc
     bash
   ;;
