@@ -395,7 +395,7 @@ case ${1} in
   fi
   ;;
 "install")
-# acsl install package
+# acsl install package run_args
 # To install package
   if [ $# -ge 2 ]; then
     echo "install packages : ${@:2:($# - 1)}"
@@ -474,6 +474,14 @@ case ${1} in
     rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
     rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
   fi
+  ;;
+  "make_package")
+    git clone --depth 1 git@github.com:acsl-tcu/ros_package.git acsl_package
+    cd acsl_package
+    git checkout -b $2
+    git push -u origin $2
+    echo "After setup the package, push to github."
+    echo "Then 
   ;;
   *)
     cd ~/$1
