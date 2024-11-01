@@ -65,8 +65,8 @@ _EOT_
   if [[ ! -f project_launch${TARGET}.sh ]]; then
     cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
   fi
-  if [[ ! -d 1_ros_launcher ]];then 
-    mkdir 1_ros_launcher
+  if [[ ! -d 1_launcher ]];then 
+    mkdir 1_launcher
   fi
   if [[ ! -d 2_ros_packages ]];then 
     mkdir 2_ros_packages
@@ -74,7 +74,7 @@ _EOT_
   #############################################
 
   chmod a+x project_launch${TARGET}.sh
-  chmod -R a+x 1_ros_launcher
+  chmod -R a+x 1_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
@@ -246,11 +246,11 @@ function install_package() {
     PACKAGE : $1
 _EOT_
     if [[ $OPT_FLAG_L = 1 ]]; then
-      if [[ -f $ACSL_ROS2_DIR/1_ros_launcher/launch_$PACKAGE.sh ]]; then
-        cp -p $ACSL_ROS2_DIR/1_ros_launcher/launch_$PACKAGE.sh launch_sample.sh
+      if [[ -f $ACSL_ROS2_DIR/1_launcher/launch_$PACKAGE.sh ]]; then
+        cp -p $ACSL_ROS2_DIR/1_launcher/launch_$PACKAGE.sh launch_sample.sh
         echo "sample launch file \"./launch_sample.sh\" is generated."
       else
-        echo $ACSL_ROS2_DIR/1_ros_launcher/launch_$PACKAGE.sh
+        echo $ACSL_ROS2_DIR/1_launcher/launch_$PACKAGE.sh
         echo "No default launch file exists."
       fi
     fi
@@ -278,7 +278,7 @@ _EOT_
       if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
         mkdir $ACSL_WORK_DIR/.install
         cd $ACSL_WORK_DIR/.install
-        git clone git@github.com:acsl-tcu/ros_package main
+        git clone git@github.com:acsl-tcu/acsl_package main
         cd -
       fi
       # update package_list
@@ -298,7 +298,7 @@ _EOT_
           git pull
           cd $ACSL_WORK_DIR
         else
-          git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/ros_package $ACSL_WORK_DIR/.install/$PACKAGE
+          git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE
         fi 
 
         echo "Set udev rule"
@@ -311,13 +311,13 @@ _EOT_
 
         echo "Set ros launch"
         if [[ $OPT_FLAG_l = 1 ]]; then
-          ROS_LAUNCH=$(ls -v ./1_ros_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
+          ROS_LAUNCH=$(ls -v ./1_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
           LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
-          cp ${OPT_VALUE_l} ./1_ros_launcher/$LAUNCH_FILE_NAME
+          cp ${OPT_VALUE_l} ./1_launcher/$LAUNCH_FILE_NAME
         else
-          cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_ros_launcher/* $ACSL_WORK_DIR/1_ros_launcher/
+          cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_launcher/* $ACSL_WORK_DIR/1_launcher/
         fi
-        chmod -R a+x ./1_ros_launcher
+        chmod -R a+x ./1_launcher
 
         if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
           echo "Install ROS package"
@@ -358,7 +358,7 @@ function remove_package() {
   remove_systemd $PACKAGE
   ## ros launch
   source $ACSL_ROS2_DIR/bashrc
-  rm -fr $ACSL_WORK_DIR/1_ros_launcher/launch_${PACKAGE}*
+  rm -fr $ACSL_WORK_DIR/1_launcher/launch_${PACKAGE}*
   ## ros package
   rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
   ## docker image
@@ -375,6 +375,36 @@ function colcon_build() {
 }
 function docker_push() {
   $ACSL_ROS2_DIR/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+}
+###################################################
+# Information
+###################################################
+function info(){
+case ${1} in
+"init")
+  ;;
+"install")
+  ;;
+"remove")
+  ;;
+"update_tag_list")
+  ;;
+"update")
+  ;;
+"freeze")
+  ;;
+"clean")
+echo "[Usage] acsl clean"
+echo "To clean up all"
+  ;;
+"make_package")
+echo "[Usage] acsl make_package package_name"
+echo "create new package"
+echo "After setup the package, push it to github."
+echo "Then install the package into your project by acsl install package."
+echo "Build the docker image and dpush it."
+    ;;
+esac
 }
 ###################################################
 # Main part
@@ -454,7 +484,7 @@ case ${1} in
 
     echo "Delete project file"
     cd $ACSL_WORK_DIR
-    rm -fr $ACSL_WORK_DIR/project_launch*.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/1_ros_launcher
+    rm -fr $ACSL_WORK_DIR/project_launch*.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/1_launcher
     
     # udev 登録解除
     echo "Deactivate udev"
@@ -475,14 +505,15 @@ case ${1} in
     rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
   fi
   ;;
-  "make_package")
-    git clone --depth 1 git@github.com:acsl-tcu/ros_package.git acsl_package
+"make_package")
+    cd ~
+    git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
     cd acsl_package
     git checkout -b $2
     git push -u origin $2
-    echo "After setup the package, push to github."
-    echo "Then install the package into your project."
-    echo "Build the docker image and dpush it."
+  ;;
+  "info")
+  info $2
   ;;
   *)
     cd ~/$1
@@ -490,3 +521,4 @@ case ${1} in
     bash
   ;;
 esac
+info $1
