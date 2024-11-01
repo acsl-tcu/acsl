@@ -1,5 +1,9 @@
 # acsl
 
+Before you start, set up your device and SSH key to GitHub. 
+
+[Setup](https://github.com/acsl-tcu/ros2/tree/main#setup)
+
 ## Install 
 
 ```bash
