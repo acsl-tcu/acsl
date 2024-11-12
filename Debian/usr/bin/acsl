@@ -313,19 +313,23 @@ _EOT_
         if [[ $OPT_FLAG_l = 1 ]]; then
           ROS_LAUNCH=$(ls -v ./1_launcher/ | grep ${OPT_VALUE_l} | fmt | awk '{print $NF}')
           LAUNCH_FILE_NAME=${OPT_VALUE_l}_$((${ROS_LAUNCH/*_/} + 1))
+          mkdir -p ./1_launcher
           cp ${OPT_VALUE_l} ./1_launcher/$LAUNCH_FILE_NAME
         else
+          mkdir -p $ACSL_WORK_DIR/1_launcher
           cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_launcher/* $ACSL_WORK_DIR/1_launcher/
         fi
         chmod -R a+x ./1_launcher
 
         if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
           echo "Install ROS package"
+          mkdir -p $ACSL_WORK_DIR/2_ros_packages
           cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
         fi
 
         if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]];then 
           echo "Pull Docker image : dockerfile.${PACKAGE}"
+          mkdir -p $ACSL_WORK_DIR/3_dockerfiles${TARGET}
           cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
           dpull_check_tag $PACKAGE
         fi
