@@ -368,13 +368,13 @@ function remove_package() {
 
 ##################################################
 function git_pull() {
-  $ACSL_ROS2_DIR/4_docker/common/scripts/gpull $1
+  .acsl/4_docker/common/scripts/gpull $1
 }
 function colcon_build() {
-  $ACSL_ROS2_DIR/0_host_commands/scripts/build_project $@
+  .acsl/0_host_commands/scripts/build_project $@
 }
 function docker_push() {
-  $ACSL_ROS2_DIR/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+  .acsl/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
 }
 ###################################################
 # Main part
