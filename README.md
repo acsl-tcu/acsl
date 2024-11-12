@@ -1,5 +1,6 @@
 # acsl
 
+
 ## Install 
 
 ```bash
@@ -14,6 +15,9 @@ sudo dpkg -r acsl
 ```
 
 ## Usage
+
+Before you start, set up your device and SSH key to GitHub. 
+
 - Register your SSH key to Github desktop
 - [Install docker](https://github.com/acsl-tcu/ros2?tab=readme-ov-file#setup)
   
