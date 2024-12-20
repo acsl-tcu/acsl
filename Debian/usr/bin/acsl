@@ -18,12 +18,15 @@ function initialize_project() {
     ROS DOMAIN ID : $RID
 _EOT_
   if [ -d ./.acsl ]; then # すでに .acslフォルダがある場合
+    echo "Already exists: load bashrc"
     source ./.acsl/bashrc
   else
     cfs=$(ls .)
     if [[ -z $cfs ]];then 
+      echo "Load project: project_${PROJECT}"
       git clone git@github.com:acsl-tcu/project_${PROJECT} .
     else
+      echo "Run in empty folder."
       exit
     fi
     ACSL_WORK_DIR="$(pwd)"
@@ -60,24 +63,19 @@ _EOT_
       echo $rule_file
     fi
     cp -p $ACSL_ROS2_DIR/rules/$rule_file ./${PROJECT}${TARGET}.rules
-  fi
-
-  if [[ ! -f project_launch${TARGET}.sh ]]; then
-    cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
-  fi
-  if [[ ! -d 1_launcher ]];then 
     mkdir 1_launcher
-  fi
-  if [[ ! -d 2_ros_packages ]];then 
     mkdir 2_ros_packages
+    cp -p $ACSL_ROS2_DIR/0_host_commands/project_launch_sh ./project_launch.sh
+    $ACSL_ROS2_DIR/0_host_commands/scripts/dpull base
   fi
-  #############################################
+  #### New project end ###############################
 
   chmod a+x project_launch${TARGET}.sh
   chmod -R a+x 1_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
+  echo "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"
   if [[ -d 3_dockerfiles${TARGET} ]];then
     echo "pull compatible docker image"
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
