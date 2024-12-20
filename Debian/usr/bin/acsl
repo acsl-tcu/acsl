@@ -79,7 +79,9 @@ _EOT_
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
   if [[ -d 3_dockerfiles${TARGET} ]];then
+    echo "pull compatible docker image"
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
+      echo "image: $i"
       dockerfile_dpull $i
     done
   fi
