@@ -75,7 +75,7 @@ _EOT_
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
-  echo "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"
+  gecho "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"
   if [[ -d 3_dockerfiles${TARGET} ]];then
     echo "pull compatible docker image"
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
@@ -84,7 +84,10 @@ _EOT_
     done
   fi
   $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
-  bash
+  bash 
+
+  gecho "Do following command every login
+  acsl $ACSL_ROS2_DIR"
 }
 
 
