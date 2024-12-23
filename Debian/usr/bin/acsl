@@ -45,7 +45,8 @@ _EOT_
   ###########################################
   ## New project
   ###########################################
-  if [[ ! -f ${PROJECT}${TARGET}.rules ]]; then
+  if [[ ! -d 1_launcher ]];then 
+  # if [[ ! -f ${PROJECT}${TARGET}.rules ]]; then
     rule_file="default.rules"
     tmp=$(uname -a | grep "raspberrypi")
     if [[ -n $tmp ]]; then
@@ -60,7 +61,7 @@ _EOT_
     tmp=$(uname -a | grep "microsoft")
     if [[ -n $tmp ]]; then
       rule_file="default.rules"
-      echo $rule_file
+      echo "Set default rules(empty) :  $rule_file"
     fi
     cp -p $ACSL_ROS2_DIR/rules/$rule_file ./${PROJECT}${TARGET}.rules
     mkdir 1_launcher
@@ -73,6 +74,7 @@ _EOT_
   chmod a+x project_launch${TARGET}.sh
   chmod -R a+x 1_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
+    echo "Setup UDEV"
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
   gecho "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"

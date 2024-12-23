@@ -18,12 +18,22 @@ sudo dpkg -r acsl
 
 Before you start, set up your device and SSH key to GitHub. 
 
-- Register your SSH key to Github desktop
-- [Install docker](https://github.com/acsl-tcu/ros2?tab=readme-ov-file#setup)
+### Register your SSH key to Github desktop
+Setup github
+```bash
+ssh-keygen
+cat ~/.ssh/id_rsa.pub
+```
+Copy and paste to <br>
+```
+account > Settings > SSH and GPG keys > New SSH key
+```
+
+### [Install docker](https://github.com/acsl-tcu/ros2?tab=readme-ov-file#setup)
   
 ### init
 ```bash
-  cd work_dir
+  mkdir work_dir && cd work_dir 
   acsl init PROJECT RID
 ```
 PROJECT(string) : project name<br />
@@ -86,21 +96,42 @@ Make *dockerfile.PACKAGE* and ask to build the image by sending it to ACSL manag
   acsl> fakeroot dpkg-deb --build Debian .
 ```
 
-### Docker image
+### build Docker image
+***For project image***
 ```bash
 git clone git@PROJECT.git
 cd PROJECT
 export PROJECT=PROJECT
-```
-For project image
-```bash
-bsbuild
+bsbuild # require PROJECT 
 build_project (ros_packages)
 dpush image_PROJECT
 ```
 
-For package image : check its versatility first.
+***For package image : check its versatility first.***
+Prepare dockerfile.PACKAGE in 3_dockerfiles
+
 ```bash
+git clone git@PROJECT.git
+cd PROJECT
+export PROJECT=PROJECT
 bsbuild base PACKAGE build
+dpush PACKAGE
+```
+
+***Direct build image ***
+
+```bash
+git clone git@PROJECT.git
+cd PROJECT
+export PROJECT=PROJECT
+dupin dev
+```
+
+Develop your package in the container.
+After complete the development, then exit the container and do follows.
+
+```bash
+docker commit dev kasekiguchi/acsl-common:PACKAGE
+docker login -u kasekiguchi
 dpush PACKAGE
 ```
