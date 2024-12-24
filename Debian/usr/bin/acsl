@@ -71,15 +71,15 @@ _EOT_
   fi
   #### New project end ###############################
 
-  if [[ -f project_launch${TARGET}.sh ]];then 
-    chmod a+x project_launch${TARGET}.sh
-  fi
-  chmod -R a+x 1_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
     echo "Setup UDEV"
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
-  gecho "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"
+
+  gecho "DOCKER"
+  echo "Search image_${PROJECT}${TARGET}"
+  dpull_check_tag image_${PROJECT}${TARGET}
+  echo "Search DOCKER IMAGE in 3_dockerfiles${TARGET}"
   if [[ -d 3_dockerfiles${TARGET} ]];then
     echo "pull compatible docker image"
     for i in $(ls 3_dockerfiles${TARGET}/dockerfile.*) ; do 
@@ -87,7 +87,11 @@ _EOT_
       dockerfile_dpull $i
     done
   fi
-  $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  chmod -R a+x 1_launcher
+  if [[ -f project_launch${TARGET}.sh ]];then 
+    chmod a+x project_launch${TARGET}.sh
+    $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  fi
   bash 
 
   gecho "Do following command every login
@@ -190,7 +194,7 @@ function update_tag_list(){
 function dpull_check_tag(){
   tag=$1
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
-  if [[ -n res ]]; then
+  if [[ -n $res ]]; then
     $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag    
   else
     recho "Not found the image with $tag\n Request update tag list"
