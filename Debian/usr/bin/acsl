@@ -71,7 +71,9 @@ _EOT_
   fi
   #### New project end ###############################
 
-  chmod a+x project_launch${TARGET}.sh
+  if [[ -f project_launch${TARGET}.sh ]];then 
+    chmod a+x project_launch${TARGET}.sh
+  fi
   chmod -R a+x 1_launcher
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
     echo "Setup UDEV"
