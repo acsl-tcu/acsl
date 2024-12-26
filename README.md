@@ -83,7 +83,7 @@ WORK_DIR/
 
 ### New project
 ```bash
-  acsl project_name project_RID
+  acsl init {project_name} {project_RID}
 ```
 Write several files
 
