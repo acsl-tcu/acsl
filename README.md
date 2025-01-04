@@ -127,6 +127,11 @@ export PROJECT=PROJECT
 dupin dev
 ```
 
+#### Direct build image from docker file
+```bash
+docker build . -f 3_dockerfiles/dockerfile.***
+```
+
 Develop your package in the container.
 After complete the development, then exit the container and do follows.
 
