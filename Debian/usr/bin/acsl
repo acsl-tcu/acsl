@@ -554,8 +554,8 @@ case ${1} in
   sudo rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
   sudo rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
   sudo rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
-;;
-"make_package")
+  ;;
+  "make_package")
     cd ~
     git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
     cd acsl_package
