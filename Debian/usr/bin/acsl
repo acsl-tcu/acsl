@@ -392,9 +392,9 @@ function remove_package() {
   echo "Remove package"
   PACKAGE=$1
   ## udev.rule
-  remove_udev $PACKAGE
+  remove_udev_installed_package $PACKAGE
   ## systemd
-  remove_systemd $PACKAGE
+  remove_systemd_installed_package $PACKAGE
   ## ros launch
   source $ACSL_ROS2_DIR/bashrc
   rm -fr $ACSL_WORK_DIR/1_launcher/launch_${PACKAGE}*
@@ -445,6 +445,15 @@ echo "Build the docker image and dpush it."
     ;;
 esac
 }
+
+function check_acsl(){
+  if [[ -v ORGPATH ]]; then 
+    echo ACTIVE ACSL project
+  else
+    exit
+    #return 0 
+  fi
+}
 ###################################################
 # Main part
 ###################################################
@@ -464,6 +473,7 @@ case ${1} in
   fi
   ;;
 "install")
+  check_acsl
 # acsl install package run_args
 # To install package
   if [ $# -ge 2 ]; then
@@ -474,6 +484,7 @@ case ${1} in
   fi
   ;;
 "remove")
+  check_acsl
 # acsl remove package_name
 # To remove package
   if [ $# -ge 2 ]; then
@@ -484,11 +495,13 @@ case ${1} in
   fi
   ;;
 "update_tag_list")
+  check_acsl
 # acsl update_tag_list 
 # run @ admin PC
   update_tag_list
   ;;
 "update")
+  check_acsl
 # acsl update ros_packages
   if [[ -d .acsl ]];then 
     echo "Update project files from github"
@@ -500,6 +513,7 @@ case ${1} in
   fi
   ;;
 "freeze")
+  check_acsl
 # acsl freeze (packages)
 # Update project folder, and rebuild and upload image_${PROJECT}${TARGET}
   if [[ -v $ACSL_WORK_DIR ]]; then
@@ -512,37 +526,36 @@ case ${1} in
   fi
   ;;
 "clean")
+  check_acsl
 # acsl clean
 # To clean up all
   cd $ACSL_WORK_DIR
-  if [[ -v ORGPATH ]]; then
-    recho "Delete ALL ACSL system"
-    export PATH="$ORGPATH"
-    echo "Delete after ORGPATH line"
-    #sed -i '/ORGPATH/,$d' ~/.bashrc
-    rm -f $ACSL_ROS2_DIR/bashrc
+  echo "Delete ALL ACSL system"
+  export PATH="$ORGPATH"
+  echo "Delete after ORGPATH line"
+  #sed -i '/ORGPATH/,$d' ~/.bashrc
+  rm -f $ACSL_ROS2_DIR/bashrc
 
-    echo "Delete project file"
-    cd $ACSL_WORK_DIR
-    rm -fr $ACSL_WORK_DIR/project_launch*.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/1_launcher
-    
-    # udev 登録解除
-    echo "Deactivate udev"
-    rm -f $ACSL_WORK_DIR/$PROJECT*.rules $ACSL_WORK_DIR/.rules
-    remove_udev()
+  echo "Delete project file"
+  cd $ACSL_WORK_DIR
+  rm -fr $ACSL_WORK_DIR/project_launch*.sh $ACSL_WORK_DIR/project_launch.service $ACSL_WORK_DIR/1_launcher
+  
+  # udev 登録解除
+  echo "Deactivate udev"
+  rm -f $ACSL_WORK_DIR/$PROJECT*.rules $ACSL_WORK_DIR/.rules
+  remove_udev
 
-    # systemd 登録解除
-    echo "Unload systemd"
-    remove_systemd()
+  # systemd 登録解除
+  echo "Unload systemd"
+  remove_systemd
 
-    # .acsl 削除
-    echo "Delete .acsl"
-    sudo rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
-    sudo rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
-    sudo rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
-  fi
-  ;;
-  "make_package")
+  # .acsl 削除
+  echo "Delete .acsl"
+  sudo rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
+  sudo rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
+  sudo rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
+;;
+"make_package")
     cd ~
     git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
     cd acsl_package
@@ -550,6 +563,7 @@ case ${1} in
     git push -u origin $2
   ;;
   "autorun")
+    check_acsl
     echo "setup systemd for autorun "
     echo "After complete, reboot and check the ros node works"
     chmod -R a+x $ACSL_WORK_DIR/1_launcher
