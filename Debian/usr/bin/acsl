@@ -462,7 +462,7 @@ if [[ -d .acsl ]];then
   source .acsl/bashrc  
 fi
 case ${1} in
-"init")
+  "init")
 # acsl init PROJECT RID (TARGET)
   if [ $# -ge 3 ] && [ ! -d .acsl ]; then
     initialize_project ${@:2:($# - 1)}
@@ -472,7 +472,7 @@ case ${1} in
     echo "Usage : acsl init project_name ros_domain_id"
   fi
   ;;
-"install")
+  "install")
   check_acsl
 # acsl install package run_args
 # To install package
@@ -483,7 +483,7 @@ case ${1} in
     echo "Usage : ascl install package_name"
   fi
   ;;
-"remove")
+  "remove")
   check_acsl
 # acsl remove package_name
 # To remove package
@@ -494,13 +494,13 @@ case ${1} in
     echo "Usage : acsl remove package_name"
   fi
   ;;
-"update_tag_list")
+  "update_tag_list")
   check_acsl
 # acsl update_tag_list 
 # run @ admin PC
   update_tag_list
   ;;
-"update")
+  "update")
   check_acsl
 # acsl update ros_packages
   if [[ -d .acsl ]];then 
@@ -512,7 +512,7 @@ case ${1} in
     echo "Couldn't find project files. Move to the project folder."
   fi
   ;;
-"freeze")
+  "freeze")
   check_acsl
 # acsl freeze (packages)
 # Update project folder, and rebuild and upload image_${PROJECT}${TARGET}
@@ -525,7 +525,7 @@ case ${1} in
     echo "I'm frozen ..."
   fi
   ;;
-"clean")
+  "clean")
   check_acsl
 # acsl clean
 # To clean up all
