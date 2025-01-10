@@ -90,7 +90,7 @@ _EOT_
   chmod -R a+x 1_launcher
   if [[ -f project_launch${TARGET}.sh ]];then 
     chmod a+x project_launch${TARGET}.sh
-    $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+#    $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   fi
   bash 
 
@@ -100,7 +100,7 @@ _EOT_
 
 
 #############################################################
-# Package install
+# Assets
 #############################################################
 # Usageを表示
 function usage() {
@@ -152,6 +152,24 @@ function set_udev() {
 }
 
 function remove_udev() {
+  echo "Delete : /etc/udev/rules.d/90-custom.rules"
+  sudo rm -f /etc/udev/rules.d/90-custom.rules
+  echo "Reload : udevadm control --reload-rules"
+  sudo udevadm control --reload-rules
+  echo "Start : udevadm trigger"
+  sudo udevadm trigger
+}
+
+function remove_systemd() {
+  echo "Stop project_launch : systemctl stop project_launch"
+  sudo systemctl stop project_launch
+  echo "Delete /etc/systemd/system/project_launch.service"
+  sudo rm -f /etc/systemd/system/project_launch.service
+  echo "reload : systemctl daemon-reload"
+  sudo systemctl daemon-reload
+}
+
+function remove_udev_installed_package() {
   echo "Remove udev"
   PACKAGE=$1
   UDEV_TARGET=${PROJECT}${TARGET}.rules
@@ -163,8 +181,10 @@ function remove_udev() {
   if [[ -n $lines ]]; then
     sed -i -e "${lines},${linee}d" $UDEV_TARGET
   fi
+  $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules  
 }
-function remove_systemd() {
+
+function remove_systemd_installed_package(){
   echo "Remove systemd"
   PACKAGE=$1
   SYSD_TARGET=project_launch${TARGET}.sh
@@ -205,6 +225,10 @@ function dockerfile_dpull(){
   TAG=${1##*dockerfile.}
   dpull_check_tag $TAG
 }
+
+#############################################################
+# package install
+#############################################################
 
 function install_package() {
   if [[ -v ACSL_ROS2_DIR ]]; then
@@ -300,9 +324,9 @@ _EOT_
 
       if [[ -n $(echo ${package_list[@]}|fmt -1|grep -x $PACKAGE) ]];then 
         ## udev.rule
-        remove_udev $PACKAGE
+        remove_udev_installed_package $PACKAGE
         ## systemd
-        remove_systemd $PACKAGE
+        remove_systemd_installed_package $PACKAGE
 
         if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
           cd $ACSL_WORK_DIR/.install/$PACKAGE
@@ -492,6 +516,7 @@ case ${1} in
 # To clean up all
   cd $ACSL_WORK_DIR
   if [[ -v ORGPATH ]]; then
+    recho "Delete ALL ACSL system"
     export PATH="$ORGPATH"
     echo "Delete after ORGPATH line"
     #sed -i '/ORGPATH/,$d' ~/.bashrc
@@ -504,28 +529,37 @@ case ${1} in
     # udev 登録解除
     echo "Deactivate udev"
     rm -f $ACSL_WORK_DIR/$PROJECT*.rules $ACSL_WORK_DIR/.rules
-    sudo rm -f /etc/udev/rules.d/90-custom.rules
-    sudo udevadm control --reload-rules
-    sudo udevadm trigger
-    
+    remove_udev()
+
     # systemd 登録解除
     echo "Unload systemd"
-    sudo systemctl stop project_launch
-    sudo systemctl daemon-reload
-    sudo rm /etc/systemd/system/project_launch.service
+    remove_systemd()
+
     # .acsl 削除
     echo "Delete .acsl"
-    rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
-    rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
-    rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
+    sudo rm -fr $ACSL_WORK_DIR/.acsl $ACSL_WORK_DIR/.install
+    sudo rm -fr $ACSL_WORK_DIR/LICENSE $ACSL_WORK_DIR/README.md $ACSL_WORK_DIR/.git*
+    sudo rm -fr $ACSL_WORK_DIR/2_ros_packages $ACSL_WORK_DIR/3_dockerfiles*
   fi
   ;;
-"make_package")
+  "make_package")
     cd ~
     git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
     cd acsl_package
     git checkout -b $2
     git push -u origin $2
+  ;;
+  "autorun")
+    echo "setup systemd for autorun "
+    echo "After complete, reboot and check the ros node works"
+    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    if [[ -f project_launch${TARGET}.sh ]];then 
+      chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+      $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+    fi
+  ;;
+  "remove_autorun")
+    remove_systemd()
   ;;
   "info")
   info $2
