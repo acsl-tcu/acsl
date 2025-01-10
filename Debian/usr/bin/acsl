@@ -573,7 +573,7 @@ case ${1} in
     fi
   ;;
   "remove_autorun")
-    remove_systemd()
+    remove_systemd
   ;;
   "info")
   info $2
