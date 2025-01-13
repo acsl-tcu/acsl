@@ -8,11 +8,13 @@ _acsl() {
 
   case $cword in
   1)
+    # subcommands
     COMPREPLY=($(compgen -W 'init remove install' -- "$cur"))
     ;;
   *)
     case ${words[1]} in
     init)
+      #
       IFS=$'\n'
       COMPREPLY=($(compgen -W '$(note list)' -- "$cur"))
       IFS=$defaultIFS

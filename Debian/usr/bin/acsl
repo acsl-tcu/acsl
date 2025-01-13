@@ -206,8 +206,12 @@ function update_tag_list(){
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
   echo ${res//,/} > $ACSL_ROS2_DIR/tag_list
+  project_list=$(gh repo list acsl-tcu | grep project |fmt | awk '{print $1}'| sed -e "s|acsl-tcu/project
+_||g")
+  echo $project_list > $ACSL_ROS2_DIR/project_list
+
   git add .
-  git commit -m "update tag_list"
+  git commit -m "update tag_list and project_list"
   git push
 }
 
