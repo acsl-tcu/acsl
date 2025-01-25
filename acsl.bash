@@ -16,15 +16,14 @@ _acsl() {
     init)
       #
       IFS=$'\n'
-      COMPREPLY=($(compgen -W '$(note list)' -- "$cur"))
+      COMPREPLY=($(compgen -W 'PROJECT_LIST' -- "$cur"))
       IFS=$defaultIFS
       ;;
-    remove)
+    remove||install)
       IFS=$'\n'
-      COMPREPLY=($(compgen -W '$(note list)' -- "$cur"))
+      COMPREPLY=($(compgen -W 'PACKAGE_LIST' -- "$cur"))
       IFS=$defaultIFS
       ;;
-    install) ;;
     esac
     ;;
   esac

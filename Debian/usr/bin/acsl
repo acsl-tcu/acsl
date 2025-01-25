@@ -24,7 +24,7 @@ _EOT_
     cfs=$(ls .)
     if [[ -z $cfs ]];then 
       echo "Load project: project_${PROJECT}"
-      git clone git@github.com:acsl-tcu/project_${PROJECT} .
+      git clone git@github.com:acsl-tcu/project_${PROJECT} .  --recurse-submodules
     else
       echo "Run in empty folder."
       exit
@@ -32,7 +32,7 @@ _EOT_
     ACSL_WORK_DIR="$(pwd)"
     ACSL_ROS2_DIR="$(pwd)/.acsl"
     echo "create .acsl folder"
-    git clone git@github.com:acsl-tcu/ros2.git .acsl
+    git clone git@github.com:acsl-tcu/ros2.git .acsl --recurse-submodules
     chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
     chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
   fi
@@ -216,6 +216,8 @@ _||g")
 }
 
 function dpull_check_tag(){
+  # $1 = TAG_NAME
+  # docker pull image with TAG_NAME if TAG_NAME in tag_list
   tag=$1
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
   if [[ -n $res ]]; then
@@ -226,6 +228,8 @@ function dpull_check_tag(){
 }
 
 function dockerfile_dpull(){
+  # $1 = dockerfile.TAG_NAME
+  # docker pull image with TAG_NAME if it exists
   TAG=${1##*dockerfile.}
   dpull_check_tag $TAG
 }
@@ -317,7 +321,7 @@ _EOT_
       if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
         mkdir $ACSL_WORK_DIR/.install
         cd $ACSL_WORK_DIR/.install
-        git clone git@github.com:acsl-tcu/acsl_package main
+        git clone git@github.com:acsl-tcu/acsl_package main  --recurse-submodules
         cd -
       fi
       # update package_list
@@ -337,7 +341,7 @@ _EOT_
           git pull
           cd $ACSL_WORK_DIR
         else
-          git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE
+          git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE  --recurse-submodules
         fi 
 
         echo "Set udev rule"
@@ -561,7 +565,7 @@ case ${1} in
   ;;
   "make_package")
     cd ~
-    git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
+    git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git --recurse-submodules
     cd acsl_package
     git checkout -b $2
     git push -u origin $2
