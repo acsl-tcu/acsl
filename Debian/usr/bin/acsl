@@ -72,7 +72,7 @@ _EOT_
   #### New project end ###############################
 
   if [[ -f ${PROJECT}${TARGET}.rules ]];then 
-    echo "Setup UDEV"
+    gecho "Setup UDEV"
     $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
 
@@ -221,6 +221,7 @@ function dpull_check_tag(){
   tag=$1
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
   if [[ -n $res ]]; then
+    gecho DOCKER PULL: image $tag
     $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag    
   else
     recho "Not found the image with $tag\n Request update tag list"
@@ -374,7 +375,7 @@ _EOT_
           echo "Pull Docker image : dockerfile.${PACKAGE}"
           mkdir -p $ACSL_WORK_DIR/3_dockerfiles${TARGET}
           cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
-          dpull_check_tag $PACKAGE
+          dpull_check_tag ${PACKAGE}
         fi
 
         echo "set project_launch${TARGET}.sh"
