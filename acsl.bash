@@ -17,10 +17,10 @@ _acsl() {
     fi
     ;;
   2)
-    echo $words
     case ${words[1]} in
     init)
       #
+      echo ${words[1]}
       IFS=$'\n'
       COMPREPLY=($(compgen -W '$(cat .acsl/project_list)' -- "$cur"))
       IFS=$defaultIFS
