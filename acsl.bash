@@ -20,7 +20,7 @@ _acsl() {
     init)
       #
       IFS=$'\n'
-      COMPREPLY=($(compgen -W 'PROJECT_LIST' -- "$cur"))
+      COMPREPLY=($(compgen -W '' -- "$cur"))
       IFS=$defaultIFS
       ;;
     remove | install)
