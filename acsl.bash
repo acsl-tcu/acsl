@@ -19,14 +19,14 @@ _acsl() {
   2)
     case ${words[1]} in
     init)
-      IFS=$'\n'
+      #      IFS=$'\n'
       COMPREPLY=($(compgen -W '$(cat .acsl/project_list)' -- "$cur"))
-      IFS=$defaultIFS
+      #     IFS=$defaultIFS
       ;;
     remove | install)
-      IFS=$'\n'
+      #    IFS=$'\n'
       COMPREPLY=($(compgen -W '$(cat .acsl/package_list)' -- "$cur"))
-      IFS=$defaultIFS
+      #   IFS=$defaultIFS
       ;;
     esac
     ;;
