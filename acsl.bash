@@ -30,4 +30,4 @@ _acsl() {
 }
 
 # 2. 補完関数とコマンドの結びつけ
-complete -F _note note
+complete -F _acsl acsl
