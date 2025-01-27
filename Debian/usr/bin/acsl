@@ -200,6 +200,7 @@ function remove_systemd_installed_package(){
 
 function update_tag_list(){
   # function to update tag_list file in $ACSL_ROS2_DIR
+  echo UPDATE TAG_LIST
   cd $ACSL_ROS2_DIR
   git checkout .
   res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
@@ -208,10 +209,12 @@ function update_tag_list(){
   echo ${res//,/} > $ACSL_ROS2_DIR/tag_list
   
   ## PROJECT_LIST
+  echo UPDATE PROJECT_LIST
   project_list=$(gh repo list acsl-tcu | grep project |fmt | awk '{print $1}'| sed -e "s|acsl-tcu/project_||g")
   echo $project_list > $ACSL_ROS2_DIR/project_list
 
   ## PACKAGE_LIST
+  echo UPDATE PACKAGE_LIST
   gh repo clone acsl-tcu/acsl_package temp
   cd temp
   git branch -a | grep /origin|grep -v HEAD| sed 's|remotes/origin/||g' > $ACSL_ROS2_DIR/package_list
