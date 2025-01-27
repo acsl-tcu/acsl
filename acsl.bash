@@ -8,7 +8,8 @@ _acsl() {
 
   case $cword in
   1)
-    if [[ -z $(which dps) ]]; then
+    #if [[ -z $(which dps) ]]; then
+    if [[ $(pwd) == $(echo ~) ]]; then
       _filedir -d
     else
       # subcommands
@@ -16,6 +17,7 @@ _acsl() {
     fi
     ;;
   2)
+    echo $words
     case ${words[1]} in
     init)
       #
