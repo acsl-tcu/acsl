@@ -30,6 +30,10 @@ _acsl() {
       ;;
     esac
     ;;
+  3)
+    list=$(cat .acsl/ros2_id_list | grep ${words[2]} | awk '{print $2}')
+    COMPREPLY=($(compgen -W '$list' -- "$cur"))
+    ;;
   esac
 }
 
