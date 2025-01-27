@@ -206,12 +206,20 @@ function update_tag_list(){
   res=$(echo ${res##*[})
   res=$(echo ${res%%]*})
   echo ${res//,/} > $ACSL_ROS2_DIR/tag_list
-  project_list=$(gh repo list acsl-tcu | grep project |fmt | awk '{print $1}'| sed -e "s|acsl-tcu/project
-_||g")
+  
+  ## PROJECT_LIST
+  project_list=$(gh repo list acsl-tcu | grep project |fmt | awk '{print $1}'| sed -e "s|acsl-tcu/project_||g")
   echo $project_list > $ACSL_ROS2_DIR/project_list
 
+  ## PACKAGE_LIST
+  gh repo clone acsl-tcu/acsl_package temp
+  cd temp
+  git branch -a | grep /origin|grep -v HEAD| sed 's|remotes/origin/||g' > $ACSL_ROS2_DIR/package_list
+  rm -fr temp
+
+## 登録
   git add .
-  git commit -m "update tag_list and project_list"
+  git commit -m "update tag_list, package_list and project_list"
   git push
 }
 
