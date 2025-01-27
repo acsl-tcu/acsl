@@ -20,12 +20,12 @@ _acsl() {
     init)
       #
       IFS=$'\n'
-      COMPREPLY=($(compgen -W '' -- "$cur"))
+      COMPREPLY=($(compgen -W '$(cat .acsl/project_list)' -- "$cur"))
       IFS=$defaultIFS
       ;;
     remove | install)
       IFS=$'\n'
-      COMPREPLY=($(compgen -W 'PACKAGE_LIST' -- "$cur"))
+      COMPREPLY=($(compgen -W '$(cat .acsl/package_list)' -- "$cur"))
       IFS=$defaultIFS
       ;;
     esac

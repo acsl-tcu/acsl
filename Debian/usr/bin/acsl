@@ -218,6 +218,7 @@ function update_tag_list(){
   gh repo clone acsl-tcu/acsl_package temp
   cd temp
   git branch -a | grep /origin|grep -v HEAD| sed 's|remotes/origin/||g' > $ACSL_ROS2_DIR/package_list
+  cd ..
   rm -fr temp
 
 ## 登録
