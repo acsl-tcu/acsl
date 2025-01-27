@@ -5,7 +5,7 @@ _acsl() {
 
   local defaultIFS=$' \t\n'
   local IFS=$defaultIFS
-
+  echo $cword
   case $cword in
   1)
     # subcommands
