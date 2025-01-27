@@ -5,13 +5,17 @@ _acsl() {
 
   local defaultIFS=$' \t\n'
   local IFS=$defaultIFS
-  echo $cword
+
   case $cword in
   1)
-    # subcommands
-    COMPREPLY=($(compgen -W 'init remove install' -- "$cur"))
+    if [[ -z $(which dps) ]]; then
+      _filedir -d
+    else
+      # subcommands
+      COMPREPLY=($(compgen -W 'init remove install' -- "$cur"))
+    fi
     ;;
-  *)
+  2)
     case ${words[1]} in
     init)
       #
