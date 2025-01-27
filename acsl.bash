@@ -17,6 +17,7 @@ _acsl() {
     fi
     ;;
   2)
+    cd $ACSL_WORK_DIR
     case ${words[1]} in
     init)
       #      IFS=$'\n'
