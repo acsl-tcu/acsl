@@ -20,8 +20,9 @@ _acsl() {
     cd $ACSL_WORK_DIR
     case ${words[1]} in
     init)
+      project_list=
       #      IFS=$'\n'
-      COMPREPLY=($(compgen -W '$(cat .acsl/project_list)' -- "$cur"))
+      COMPREPLY=($(compgen -W '' -- "$cur"))
       #     IFS=$defaultIFS
       ;;
     remove | install)
