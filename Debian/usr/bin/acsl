@@ -602,7 +602,7 @@ case ${1} in
   *)
     cd ~/$1
     source .acsl/bashrc
-    bash --rcfile < (cat ~/.bashrc $ACSL_ROS2_DIR/bashrc)
+    bash --rcfile $ACSL_ROS2_DIR/bashrc
   ;;
 esac
 info $1
