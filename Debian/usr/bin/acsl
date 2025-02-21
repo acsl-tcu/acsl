@@ -602,7 +602,7 @@ case ${1} in
   *)
     cd ~/$1
     source .acsl/bashrc
-    exec bash
+    exec bash --norc
   ;;
 esac
 info $1
