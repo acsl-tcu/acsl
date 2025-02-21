@@ -92,8 +92,7 @@ _EOT_
     chmod a+x project_launch${TARGET}.sh
 #    $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
   fi
-  bash 
-
+  bash --rcfile .acsl/bashrc
   gecho "Do following command every login
   acsl $ACSL_ROS2_DIR"
 }
@@ -601,8 +600,7 @@ case ${1} in
   ;;
   *)
     cd ~/$1
-    source .acsl/bashrc
-    bash --rcfile $ACSL_ROS2_DIR/bashrc
+    bash --rcfile .acsl/bashrc
   ;;
 esac
 info $1
