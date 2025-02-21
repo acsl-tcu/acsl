@@ -4,7 +4,7 @@
 ## Install 
 
 ```bash
-curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v1.0/acsl_1.1_all.deb
+curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v1.1/acsl_1.1_all.deb
 sudo dpkg -i acsl_1.1_all.deb
 rm -f acsl_1.1_all.deb
 ```
