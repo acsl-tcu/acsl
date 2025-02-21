@@ -481,6 +481,8 @@ function check_acsl(){
 ###################################################
 if [[ -d .acsl ]];then 
   echo "Load settings"
+  cd .acsl
+  0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY
   source .acsl/bashrc  
 fi
 case ${1} in
@@ -601,6 +603,8 @@ case ${1} in
   info $2
   ;;
   *)
+    cd ~/$1/.acsl
+    0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
     cd ~/$1
     bash --rcfile .acsl/bashrc
   ;;
