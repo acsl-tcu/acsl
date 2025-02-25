@@ -483,7 +483,8 @@ if [[ -d .acsl ]];then
   echo "Load settings"
   cd .acsl
   0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY
-  source bashrc  
+  source bashrc
+  cd $ACSL_WORK_DIR
 fi
 case ${1} in
   "init")
