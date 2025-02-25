@@ -14,5 +14,5 @@ git add .
 git commit -m "update acsl command"
 git push
 
-echo https://github.com/acsl-tcu/acsl/releases/edit/v1.0
+echo https://github.com/acsl-tcu/acsl/releases/edit/v1.1
 explorer.exe .
