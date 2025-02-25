@@ -95,7 +95,7 @@ _EOT_
   
   gecho "Do following command every login
   acsl $ACSL_ROS2_DIR"
-  
+
   bash --rcfile .acsl/bashrc
 }
 
@@ -483,7 +483,7 @@ if [[ -d .acsl ]];then
   echo "Load settings"
   cd .acsl
   0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY
-  source .acsl/bashrc  
+  source bashrc  
 fi
 case ${1} in
   "init")
