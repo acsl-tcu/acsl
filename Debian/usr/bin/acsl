@@ -71,10 +71,7 @@ _EOT_
   fi
   #### New project end ###############################
 
-  if [[ -f ${PROJECT}${TARGET}.rules ]];then 
-    gecho "Setup UDEV"
-    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
-  fi
+  setup_udev()
 
   gecho "DOCKER"
   echo "Search image_${PROJECT}${TARGET}"
@@ -141,6 +138,13 @@ function printOptions() {
     fi
   done
   echo
+}
+
+function setup_udev(){
+  if [[ -f ${PROJECT}${TARGET}.rules ]];then 
+    gecho "Setup UDEV"
+    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+  fi
 }
 
 function set_udev() {
@@ -510,8 +514,6 @@ case ${1} in
   ;;
   "remove")
   check_acsl
-# acsl remove package_name
-# To remove package
   if [ $# -ge 2 ]; then
     echo "remove packages : ${@:2:($# - 1)}"
     remove_package ${@:2:($# - 1)}
@@ -521,18 +523,14 @@ case ${1} in
   ;;
   "update_tag_list")
   check_acsl
-# acsl update_tag_list 
-# run @ admin PC
   update_tag_list
   ;;
   "update")
   check_acsl
-# acsl update ros_packages
   if [[ -d .acsl ]];then 
     echo "Update project files from github"
     git_pull
     colcon_build ${@:2:($# - 1)}
-    # update_project ${@:2:($# - 1)}
   else
     echo "Couldn't find project files. Move to the project folder."
   fi
@@ -599,6 +597,9 @@ case ${1} in
   ;;
   "remove_autorun")
     remove_systemd
+  ;;
+  "setup_udev")
+    setup_udev()
   ;;
   "info")
   info $2
