@@ -1,1 +1,511 @@
+#!/bin/bash
+#############################################################
+# Assets
+#############################################################
+# Usageを表示
+function usage() {
+  echo $1
+  cat <<_EOT_
+Usage:
+  $(basename $0) [-a] [-B] [-b bargv] ...
 
+Description:
+  XXX
+
+Options:
+  -a オプションa
+  -B オプションB
+  -b オプションbの引数値を指定
+  -h ヘルプ表示
+
+_EOT_
+  exit 1
+}
+
+# オプションフラグ用変数初期化
+function initOptionFlags() {
+  for char in {{a..z},{A..Z}}; do
+    eval OPT_FLAG_${char}=0
+  done
+}
+
+# オプション解析結果を表示
+function printOptions() {
+  echo "### 指定オプション一覧"
+  for char in {{a..z},{A..Z}}; do
+    opt=$(eval echo \${OPT_FLAG_${char}:-""})
+    optarg=$(eval echo \${OPT_VALUE_${char}:-""})
+    if [[ $opt = 1 ]]; then
+      echo "opt=-${char} ${optarg:+optarg=${optarg}}"
+    fi
+  done
+  echo
+}
+
+##################################################
+function git_pull() {
+  .acsl/4_docker/common/scripts/gpull $1
+}
+function colcon_build() {
+  .acsl/0_host_commands/scripts/build_project $@
+}
+function docker_push() {
+  .acsl/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+}
+
+function check_acsl() {
+  if [[ -v ORGPATH ]]; then
+    #echo ACTIVE ACSL project
+    return 0
+  else
+    echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
+    return 1
+  fi
+}
+# if check_acsl; then
+#   echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
+# else
+#   echo "Exit"
+#   exit 1
+# fi
+
+function change_dir_for_init() {
+  if [ "${1-}" = "init" ]; then
+    echo "Initialize project in current folder"
+  elif [[ -d $1 ]]; then
+    echo "Move to $1 for initialization"
+    cd $1
+  else
+    echo "Create new directory $1 for initialization"
+    mkdir $1
+    cd $1
+  fi
+}
+
+function check_empty() {
+  if [ -z "$(find . -mindepth 1 -print -quit)" ]; then
+    # echo "Directory is empty"
+    # echo $PWD
+    return 0
+  else
+    # echo "Directory is not empty"
+    # echo $PWD
+    return 1
+  fi
+}
+
+# change_dir_for_init $1
+# if check_empty; then
+#   echo "Directory is emptyaaa"
+# else
+#   echo "Directory is not emptyaaa"
+#   exit 1
+# fi
+###################################################
+# Information
+###################################################
+function man() {
+  case ${1} in
+  "init")
+    echo "Usage : acsl prject_dir project_name ros_domain_id (target)"
+    ;;
+  "install")
+    echo "Usage : acsl install package_name"
+    echo "To install package into your project"
+    ;;
+  "remove")
+    echo "Usage : acsl remove package_name"
+    echo "To remove package from your project"
+    ;;
+  "update_tag_list")
+    echo "Usage : acsl update_tag_list"
+    echo "To update tag list from docker hub"
+    ;;
+  "update") ;;
+  "freeze") ;;
+  "clean")
+    echo "[Usage] acsl clean"
+    echo "To clean up all"
+    ;;
+  "make_package")
+    echo "[Usage] acsl make_package package_name"
+    echo "create new package"
+    echo "After setup the package, push it to github."
+    echo "Then install the package into your project by acsl install package."
+    echo "Build the docker image and dpush it."
+    ;;
+  esac
+}
+function update_tag_list() {
+  # function to update tag_list file in $ACSL_ROS2_DIR
+  echo UPDATE TAG_LIST
+  cd $ACSL_ROS2_DIR
+  git checkout .
+  res=$(docker run --rm quay.io/skopeo/stable:v1.9.2 list-tags --debug docker://kasekiguchi/acsl-common)
+  res=$(echo ${res##*[})
+  res=$(echo ${res%%]*})
+  echo ${res//,/} >$ACSL_ROS2_DIR/tag_list
+
+  ## PROJECT_LIST
+  echo UPDATE PROJECT_LIST
+  project_list=$(gh repo list acsl-tcu | grep project | fmt | awk '{print $1}' | sed -e "s|acsl-tcu/project_||g")
+  echo $project_list >$ACSL_ROS2_DIR/project_list
+
+  ## PACKAGE_LIST
+  echo UPDATE PACKAGE_LIST
+  gh repo clone acsl-tcu/acsl_package temp
+  cd temp
+  git branch -a | grep /origin | grep -v HEAD | sed 's|remotes/origin/||g' >$ACSL_ROS2_DIR/package_list
+  cd ..
+  rm -fr temp
+
+  ## 登録
+  git add .
+  git commit -m "update tag_list, package_list and project_list"
+  git push
+}
+
+function dpull_check_tag() {
+  # $1 = TAG_NAME
+  # docker pull image with TAG_NAME if TAG_NAME in tag_list
+  tag=$1
+  res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
+  if [[ -n $res ]]; then
+    gecho DOCKER PULL: image $tag
+    $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag
+  else
+    recho "Not found the image with $tag\n Request update tag list"
+  fi
+}
+
+function dockerfile_dpull() {
+  # $1 = dockerfile.TAG_NAME
+  # docker pull image with TAG_NAME if it exists
+  TAG=${1##*dockerfile.}
+  dpull_check_tag $TAG
+}
+function remove_systemd() {
+  echo "Stop project_launch : systemctl stop project_launch"
+  sudo systemctl stop project_launch
+  echo "Delete /etc/systemd/system/project_launch.service"
+  sudo rm -f /etc/systemd/system/project_launch.service
+  echo "reload : systemctl daemon-reload"
+  sudo systemctl daemon-reload
+}
+
+function remove_package_systemd() {
+  echo "Remove systemd"
+  PACKAGE=$1
+  SYSD_TARGET=project_launch${TARGET}.sh
+  LAUNCHS="### $PACKAGE ###"
+  LAUNCHE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$LAUNCHS" "$SYSD_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$LAUNCHE" "$SYSD_TARGET" | cut -d: -f1))
+  if [[ -n $lines ]]; then
+    sed -i -e "${lines},${linee}d" $SYSD_TARGET
+  fi
+}
+function setup_udev() {
+  if [[ -f ${PROJECT}${TARGET}.rules ]]; then
+    gecho "Setup UDEV"
+    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+  fi
+}
+
+function remove_udev() {
+  echo "Delete : /etc/udev/rules.d/90-custom.rules"
+  sudo rm -f /etc/udev/rules.d/90-custom.rules
+  echo "Reload : udevadm control --reload-rules"
+  sudo udevadm control --reload-rules
+  echo "Start : udevadm trigger"
+  sudo udevadm trigger
+}
+
+function set_package_udev() {
+  if [[ -f ${1} ]]; then
+    echo "### $PACKAGE ###" >>${PROJECT}${TARGET}.rules
+    cat ${1} >>${PROJECT}${TARGET}.rules
+    echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
+  fi
+}
+
+function remove_package_udev() {
+  echo "Remove udev"
+  PACKAGE=$1
+  UDEV_TARGET=${PROJECT}${TARGET}.rules
+  RULES="### $PACKAGE ###"
+  RULEE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$RULES" "$UDEV_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$RULEE" "$UDEV_TARGET" | cut -d: -f1))
+  if [[ -n $lines ]]; then
+    sed -i -e "${lines},${linee}d" $UDEV_TARGET
+  fi
+  echo "Stop udev service"
+  remove_udev
+}
+##############################################
+## Initilize
+# acsl init/project_dir PROJECT RID [TARGET]
+# init: initialize project on current directory
+# project_dir: initialize project in this directory
+# PROJECT : project name
+# RID : ROS Domain ID
+# TARGET : _target (optional, default is empty)
+# Example : acsl robot rf 10 robot
+##############################################
+function initialize_project() {
+  PROJECT=${1}
+  RID=$2
+  if [[ $# -eq 3 ]]; then
+    TARGET=_${3#_} #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
+  else
+    TARGET=""
+  fi
+  # cat <<_EOT_
+  # Initialize acsl project
+  #     PROJECT : $PROJECT
+  #     ROS DOMAIN ID : $RID
+  #     TARGET : $TARGET
+  # _EOT_
+
+  ## Clone project repository
+  echo "Load project: project_${PROJECT}"
+  git clone git@github.com:acsl-tcu/project_${PROJECT} . --recurse-submodules
+  ACSL_WORK_DIR="$(pwd)"
+  ACSL_ROS2_DIR="$(pwd)/.acsl"
+  echo "create .acsl folder"
+  git clone git@github.com:acsl-tcu/ros2.git .acsl --recurse-submodules
+  chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
+  chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
+  chmod -R a+x $ACSL_WORK_DIR/1_launcher
+  chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
+  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
+  source $ACSL_ROS2_DIR/bashrc
+
+  if [ -e setup$TARGET ]; then
+    gecho "Run setup$TARGET"
+    chmod a+x setup$TARGET
+    ./setup$TARGET full
+  else
+    echo "No setup$TARGET found, skip"
+    dpull jazzy$x86
+    dtag jazzy$x86 image_${PROJECT}${TARGET}${x86}
+  fi
+
+  gecho "Do following command every login
+  acsl $ACSL_ROS2_DIR"
+
+  bash --rcfile .acsl/bashrc
+}
+#############################################################
+# package install
+#############################################################
+
+function install_package() {
+
+  # 引数の数を確認
+  echo "### 引数一覧"
+  for argv in $@; do
+    echo ${argv}
+  done
+  echo
+  PACKAGE=${1}
+
+  ####################################
+  ##  Install package main
+  ####################################
+  if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
+    mkdir $ACSL_WORK_DIR/.install
+    cd $ACSL_WORK_DIR/.install
+    git clone git@github.com:acsl-tcu/acsl_package main
+  fi
+  # update package_list
+  cd $ACSL_WORK_DIR/.install/main
+  git fetch
+  package_list=($(git branch -a | grep remote | grep -v HEAD | grep -v main | sed -e "s|remotes/origin/||g"))
+
+  if [[ -n $(echo ${package_list[@]} | fmt -1 | grep -x $PACKAGE) ]]; then
+    ## udev.rule
+    remove_package_udev $PACKAGE
+    ## systemd
+    remove_package_systemd $PACKAGE
+
+    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
+      cd $ACSL_WORK_DIR/.install/$PACKAGE
+      git pull
+    else
+      git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE --recurse-submodules
+    fi
+
+    echo "Set udev rule"
+    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
+
+    echo "Set ros launch"
+    mkdir -p $ACSL_WORK_DIR/1_launcher
+    cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_launcher/* $ACSL_WORK_DIR/1_launcher/
+    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+
+    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
+      echo "Install ROS package"
+      mkdir -p $ACSL_WORK_DIR/2_ros_packages
+      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+    fi
+
+    if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]]; then
+      echo "Pull Docker image : dockerfile.${PACKAGE}"
+      mkdir -p $ACSL_WORK_DIR/3_dockerfiles${TARGET}
+      cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
+      dpull_check_tag ${PACKAGE}
+    fi
+
+    echo "set project_launch${TARGET}.sh"
+    echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
+    echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
+    echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
+
+    $ACSL_ROS2_DIR/0_host_commands/scripts/dup all
+  else
+    recho "make package first as a branch on 'ros_package' repo"
+  fi
+
+  exit 1
+}
+
+###################################################
+function remove_package() {
+  echo "Remove package"
+  PACKAGE=$1
+  ## udev.rule
+  remove_package_udev $PACKAGE
+  ## systemd
+  remove_package_systemd $PACKAGE
+  ## ros launch
+  source $ACSL_ROS2_DIR/bashrc
+  rm -fr $ACSL_WORK_DIR/1_launcher/launch_${PACKAGE}*
+  ## ros package
+  rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
+  ## docker image
+  drm all
+  drmi $PACKAGE
+}
+# acsl switch_mode
+# This script is used to switch modes in the ACSL environment.
+# It handles various commands such as install, remove, update, freeze, clean, make_package, and more.
+# [Usage]: acsl [command] [options]
+# check_acsl and home functions are done in 99_main
+function switch_mode() {
+  case ${1} in
+  "install")
+    # acsl install package run_args
+    # To install package
+    if [ $# -ge 2 ]; then
+      echo "install packages : ${@:2:($# - 1)}"
+      install_package ${@:2:($# - 1)}
+    else
+      echo "Usage : acsl install package_name"
+    fi
+    ;;
+  "remove")
+    if [ $# -ge 2 ]; then
+      echo "remove packages : ${@:2:($# - 1)}"
+      remove_package ${@:2:($# - 1)}
+    else
+      echo "Usage : acsl remove package_name"
+    fi
+    ;;
+  "update_tag_list")
+    update_tag_list
+    ;;
+  "update")
+    echo "Update project files from github"
+    git_pull
+    if [ -e setup$TARGET ]; then
+      gecho "Run setup$TARGET"
+      chmod a+x setup$TARGET
+      ./setup$TARGET
+    fi
+    ;;
+  "clean")
+    # acsl clean
+    # To clean up all
+    cd $ACSL_WORK_DIR
+    echo "Delete ALL ACSL system"
+    export PATH="$ORGPATH"
+    # udev 登録解除
+    echo "Deactivate udev"
+    remove_udev
+
+    # systemd 登録解除
+    echo "Unload systemd"
+    remove_systemd
+
+    echo "Delete project directory"
+    cd $ACSL_WORK_DIR/..
+    rm -fr $ACSL_WORK_DIR
+    ;;
+  "make_package")
+    cd ~
+    git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
+    cd acsl_package
+    git checkout -b $2
+    git push -u origin $2
+    ;;
+  "setup_systemd")
+    echo "setup systemd for autorun "
+    gecho "After complete, reboot and check the ros node works"
+    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    if [[ -f project_launch${TARGET}.sh ]]; then
+      chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+      $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+    fi
+    ;;
+  "remove_systemd")
+    remove_systemd
+    ;;
+  "setup_udev")
+    setup_udev
+    ;;
+  "remove_udev")
+    remove_udev
+    ;;
+  "man")
+    man $2
+    ;;
+  esac
+}
+###################################################
+# Main part
+# [flow]
+# /check_acsl
+# |-N> change_dir_for_init
+#   |> check_empty
+#      |-Y> initialize_project
+#      |-N> $# == 1 -> enter the project
+#            |-N>exit
+# |-Y> home
+#      |> switch_mode
+###################################################
+if check_acsl; then
+  echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
+  echo "PROJECT : $PROJECT"
+  echo "ROS Domain ID : $RID"
+  echo "TARGET : $TARGET"
+  home
+  switch_mode $@
+else
+  change_dir_for_init $1
+  if check_empty; then
+    initialize_project ${@:2:($# - 1)}
+  elif [ $# -eq 1 ]; then
+    cd ~/$1/.acsl
+    0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
+    cd ~/$1
+    bash --rcfile .acsl/bashrc
+  else
+    man init
+    exit 1
+  fi
+fi
