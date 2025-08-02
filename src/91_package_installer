@@ -1,0 +1,91 @@
+#############################################################
+# package install
+#############################################################
+
+function install_package() {
+
+  # 引数の数を確認
+  echo "### 引数一覧"
+  for argv in $@; do
+    echo ${argv}
+  done
+  echo
+  PACKAGE=${1}
+
+  ####################################
+  ##  Install package main
+  ####################################
+  if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
+    mkdir $ACSL_WORK_DIR/.install
+    cd $ACSL_WORK_DIR/.install
+    git clone git@github.com:acsl-tcu/acsl_package main
+  fi
+  # update package_list
+  cd $ACSL_WORK_DIR/.install/main
+  git fetch
+  package_list=($(git branch -a | grep remote | grep -v HEAD | grep -v main | sed -e "s|remotes/origin/||g"))
+
+  if [[ -n $(echo ${package_list[@]} | fmt -1 | grep -x $PACKAGE) ]]; then
+    ## udev.rule
+    remove_package_udev $PACKAGE
+    ## systemd
+    remove_package_systemd $PACKAGE
+
+    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
+      cd $ACSL_WORK_DIR/.install/$PACKAGE
+      git pull
+    else
+      git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE --recurse-submodules
+    fi
+
+    echo "Set udev rule"
+    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
+
+    echo "Set ros launch"
+    mkdir -p $ACSL_WORK_DIR/1_launcher
+    cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_launcher/* $ACSL_WORK_DIR/1_launcher/
+    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+
+    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
+      echo "Install ROS package"
+      mkdir -p $ACSL_WORK_DIR/2_ros_packages
+      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+    fi
+
+    if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]]; then
+      echo "Pull Docker image : dockerfile.${PACKAGE}"
+      mkdir -p $ACSL_WORK_DIR/3_dockerfiles${TARGET}
+      cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
+      dpull_check_tag ${PACKAGE}
+    fi
+
+    echo "set project_launch${TARGET}.sh"
+    echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
+    echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
+    echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
+
+    $ACSL_ROS2_DIR/0_host_commands/scripts/dup all
+  else
+    recho "make package first as a branch on 'ros_package' repo"
+  fi
+
+  exit 1
+}
+
+###################################################
+function remove_package() {
+  echo "Remove package"
+  PACKAGE=$1
+  ## udev.rule
+  remove_package_udev $PACKAGE
+  ## systemd
+  remove_package_systemd $PACKAGE
+  ## ros launch
+  source $ACSL_ROS2_DIR/bashrc
+  rm -fr $ACSL_WORK_DIR/1_launcher/launch_${PACKAGE}*
+  ## ros package
+  rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
+  ## docker image
+  drm all
+  drmi $PACKAGE
+}

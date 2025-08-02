@@ -1,0 +1,103 @@
+#!/bin/bash
+#############################################################
+# Assets
+#############################################################
+# Usageを表示
+function usage() {
+  echo $1
+  cat <<_EOT_
+Usage:
+  $(basename $0) [-a] [-B] [-b bargv] ...
+
+Description:
+  XXX
+
+Options:
+  -a オプションa
+  -B オプションB
+  -b オプションbの引数値を指定
+  -h ヘルプ表示
+
+_EOT_
+  exit 1
+}
+
+# オプションフラグ用変数初期化
+function initOptionFlags() {
+  for char in {{a..z},{A..Z}}; do
+    eval OPT_FLAG_${char}=0
+  done
+}
+
+# オプション解析結果を表示
+function printOptions() {
+  echo "### 指定オプション一覧"
+  for char in {{a..z},{A..Z}}; do
+    opt=$(eval echo \${OPT_FLAG_${char}:-""})
+    optarg=$(eval echo \${OPT_VALUE_${char}:-""})
+    if [[ $opt = 1 ]]; then
+      echo "opt=-${char} ${optarg:+optarg=${optarg}}"
+    fi
+  done
+  echo
+}
+
+##################################################
+function git_pull() {
+  .acsl/4_docker/common/scripts/gpull $1
+}
+function colcon_build() {
+  .acsl/0_host_commands/scripts/build_project $@
+}
+function docker_push() {
+  .acsl/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+}
+
+function check_acsl() {
+  if [[ -v ORGPATH ]]; then
+    #echo ACTIVE ACSL project
+    return 0
+  else
+    echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
+    return 1
+  fi
+}
+# if check_acsl; then
+#   echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
+# else
+#   echo "Exit"
+#   exit 1
+# fi
+
+function change_dir_for_init() {
+  if [ "${1-}" = "init" ]; then
+    echo "Initialize project in current folder"
+  elif [[ -d $1 ]]; then
+    echo "Move to $1 for initialization"
+    cd $1
+  else
+    echo "Create new directory $1 for initialization"
+    mkdir $1
+    cd $1
+  fi
+}
+
+function check_empty() {
+  if [ -z "$(find . -mindepth 1 -print -quit)" ]; then
+    # echo "Directory is empty"
+    # echo $PWD
+    return 0
+  else
+    # echo "Directory is not empty"
+    # echo $PWD
+    return 1
+  fi
+}
+
+# change_dir_for_init $1
+# if check_empty; then
+#   echo "Directory is emptyaaa"
+# else
+#   echo "Directory is not emptyaaa"
+#   exit 1
+# fi

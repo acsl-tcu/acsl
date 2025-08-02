@@ -1,0 +1,39 @@
+function setup_udev() {
+  if [[ -f ${PROJECT}${TARGET}.rules ]]; then
+    gecho "Setup UDEV"
+    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+  fi
+}
+
+function remove_udev() {
+  echo "Delete : /etc/udev/rules.d/90-custom.rules"
+  sudo rm -f /etc/udev/rules.d/90-custom.rules
+  echo "Reload : udevadm control --reload-rules"
+  sudo udevadm control --reload-rules
+  echo "Start : udevadm trigger"
+  sudo udevadm trigger
+}
+
+function set_package_udev() {
+  if [[ -f ${1} ]]; then
+    echo "### $PACKAGE ###" >>${PROJECT}${TARGET}.rules
+    cat ${1} >>${PROJECT}${TARGET}.rules
+    echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
+  fi
+}
+
+function remove_package_udev() {
+  echo "Remove udev"
+  PACKAGE=$1
+  UDEV_TARGET=${PROJECT}${TARGET}.rules
+  RULES="### $PACKAGE ###"
+  RULEE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$RULES" "$UDEV_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$RULEE" "$UDEV_TARGET" | cut -d: -f1))
+  if [[ -n $lines ]]; then
+    sed -i -e "${lines},${linee}d" $UDEV_TARGET
+  fi
+  echo "Stop udev service"
+  remove_udev
+}

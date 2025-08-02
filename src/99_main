@@ -1,0 +1,33 @@
+###################################################
+# Main part
+# [flow]
+# /check_acsl
+# |-N> change_dir_for_init
+#   |> check_empty
+#      |-Y> initialize_project
+#      |-N> $# == 1 -> enter the project
+#            |-N>exit
+# |-Y> home
+#      |> switch_mode
+###################################################
+if check_acsl; then
+  echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
+  echo "PROJECT : $PROJECT"
+  echo "ROS Domain ID : $RID"
+  echo "TARGET : $TARGET"
+  home
+  switch_mode $@
+else
+  change_dir_for_init $1
+  if check_empty; then
+    initialize_project ${@:2:($# - 1)}
+  elif [ $# -eq 1 ]; then
+    cd ~/$1/.acsl
+    0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
+    cd ~/$1
+    bash --rcfile .acsl/bashrc
+  else
+    man init
+    exit 1
+  fi
+fi

@@ -1,0 +1,22 @@
+function remove_systemd() {
+  echo "Stop project_launch : systemctl stop project_launch"
+  sudo systemctl stop project_launch
+  echo "Delete /etc/systemd/system/project_launch.service"
+  sudo rm -f /etc/systemd/system/project_launch.service
+  echo "reload : systemctl daemon-reload"
+  sudo systemctl daemon-reload
+}
+
+function remove_package_systemd() {
+  echo "Remove systemd"
+  PACKAGE=$1
+  SYSD_TARGET=project_launch${TARGET}.sh
+  LAUNCHS="### $PACKAGE ###"
+  LAUNCHE="### $PACKAGE END ###"
+  # 文字列Aが含まれる行の行数を取得
+  lines=($(grep -n "$LAUNCHS" "$SYSD_TARGET" | cut -d: -f1))
+  linee=($(grep -n "$LAUNCHE" "$SYSD_TARGET" | cut -d: -f1))
+  if [[ -n $lines ]]; then
+    sed -i -e "${lines},${linee}d" $SYSD_TARGET
+  fi
+}

@@ -1,11 +1,21 @@
 #! /bin/bash
 
 git pull
+rm -f acsl_*_all.deb
+rm -f Debian/usr/bin/acsl
+{
+  echo '#!/bin/bash'
+  echo "man $@" >>Debian/usr/bin/acsl
+  for f in src/*; do
+    sed '1{/^#!\/.*sh$/d}' "$f"
+  done
+} >Debian/usr/bin/acsl
+
 cd Debian
 md5sum usr/bin/acsl | tee DEBIAN/md5sums
 cd ..
 fakeroot dpkg-deb --build Debian .
-sudo dpkg -i acsl_1.1_all.deb
+sudo dpkg -i acsl_2.0_all.deb
 
 tmp=gh repo list acsl-tcu | grep project | fmt | awk '{print $1}' | sed -e "s|acsl-tcu/project
 _||g"

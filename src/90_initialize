@@ -1,0 +1,55 @@
+##############################################
+## Initilize
+# acsl init/project_dir PROJECT RID [TARGET]
+# init: initialize project on current directory
+# project_dir: initialize project in this directory
+# PROJECT : project name
+# RID : ROS Domain ID
+# TARGET : _target (optional, default is empty)
+# Example : acsl robot rf 10 robot
+##############################################
+function initialize_project() {
+  PROJECT=${1}
+  RID=$2
+  if [[ $# -eq 3 ]]; then
+    TARGET=_${3#_} #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
+  else
+    TARGET=""
+  fi
+  # cat <<_EOT_
+  # Initialize acsl project
+  #     PROJECT : $PROJECT
+  #     ROS DOMAIN ID : $RID
+  #     TARGET : $TARGET
+  # _EOT_
+
+  ## Clone project repository
+  echo "Load project: project_${PROJECT}"
+  git clone git@github.com:acsl-tcu/project_${PROJECT} . --recurse-submodules
+  ACSL_WORK_DIR="$(pwd)"
+  ACSL_ROS2_DIR="$(pwd)/.acsl"
+  echo "create .acsl folder"
+  git clone git@github.com:acsl-tcu/ros2.git .acsl --recurse-submodules
+  chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
+  chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
+  chmod -R a+x $ACSL_WORK_DIR/1_launcher
+  chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
+  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
+  source $ACSL_ROS2_DIR/bashrc
+
+  if [ -e setup$TARGET ]; then
+    gecho "Run setup$TARGET"
+    chmod a+x setup$TARGET
+    ./setup$TARGET full
+  else
+    echo "No setup$TARGET found, skip"
+    dpull jazzy$x86
+    dtag jazzy$x86 image_${PROJECT}${TARGET}${x86}
+  fi
+
+  gecho "Do following command every login
+  acsl $ACSL_ROS2_DIR"
+
+  bash --rcfile .acsl/bashrc
+}

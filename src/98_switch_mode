@@ -1,0 +1,85 @@
+# acsl switch_mode
+# This script is used to switch modes in the ACSL environment.
+# It handles various commands such as install, remove, update, freeze, clean, make_package, and more.
+# [Usage]: acsl [command] [options]
+# check_acsl and home functions are done in 99_main
+function switch_mode() {
+  case ${1} in
+  "install")
+    # acsl install package run_args
+    # To install package
+    if [ $# -ge 2 ]; then
+      echo "install packages : ${@:2:($# - 1)}"
+      install_package ${@:2:($# - 1)}
+    else
+      echo "Usage : acsl install package_name"
+    fi
+    ;;
+  "remove")
+    if [ $# -ge 2 ]; then
+      echo "remove packages : ${@:2:($# - 1)}"
+      remove_package ${@:2:($# - 1)}
+    else
+      echo "Usage : acsl remove package_name"
+    fi
+    ;;
+  "update_tag_list")
+    update_tag_list
+    ;;
+  "update")
+    echo "Update project files from github"
+    git_pull
+    if [ -e setup$TARGET ]; then
+      gecho "Run setup$TARGET"
+      chmod a+x setup$TARGET
+      ./setup$TARGET
+    fi
+    ;;
+  "clean")
+    # acsl clean
+    # To clean up all
+    cd $ACSL_WORK_DIR
+    echo "Delete ALL ACSL system"
+    export PATH="$ORGPATH"
+    # udev 登録解除
+    echo "Deactivate udev"
+    remove_udev
+
+    # systemd 登録解除
+    echo "Unload systemd"
+    remove_systemd
+
+    echo "Delete project directory"
+    cd $ACSL_WORK_DIR/..
+    rm -fr $ACSL_WORK_DIR
+    ;;
+  "make_package")
+    cd ~
+    git clone --depth 1 git@github.com:acsl-tcu/acsl_package.git
+    cd acsl_package
+    git checkout -b $2
+    git push -u origin $2
+    ;;
+  "setup_systemd")
+    echo "setup systemd for autorun "
+    gecho "After complete, reboot and check the ros node works"
+    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    if [[ -f project_launch${TARGET}.sh ]]; then
+      chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+      $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+    fi
+    ;;
+  "remove_systemd")
+    remove_systemd
+    ;;
+  "setup_udev")
+    setup_udev
+    ;;
+  "remove_udev")
+    remove_udev
+    ;;
+  "man")
+    man $2
+    ;;
+  esac
+}
