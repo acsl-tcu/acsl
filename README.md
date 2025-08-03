@@ -5,6 +5,7 @@
 ```bash
 curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v2.0/acsl_2.0_all.deb
 sudo dpkg -i acsl_2.0_all.deb
+sudo chmod a+x /usr/bin/acsl
 rm -f acsl_2.0_all.deb
 ```
 
