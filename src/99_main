@@ -11,10 +11,6 @@
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
-  echo "PROJECT : $PROJECT"
-  echo "ROS Domain ID : $RID"
-  echo "TARGET : $TARGET"
   home
   switch_mode $@
 else
