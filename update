@@ -1,5 +1,5 @@
 #! /bin/bash
-version=v2.0
+version=2.0
 git pull
 rm -f acsl_*_all.deb
 rm -f Debian/usr/bin/acsl
@@ -24,5 +24,5 @@ git add .
 git commit -m "update acsl command"
 git push
 
-echo https://github.com/acsl-tcu/acsl/releases/edit/${version}
+echo https://github.com/acsl-tcu/acsl/releases/edit/v${version}
 explorer.exe .
