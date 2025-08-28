@@ -401,6 +401,8 @@ function remove_package() {
 # [Usage]: acsl [command] [options]
 # check_acsl and home functions are done in 99_main
 function switch_mode() {
+  source .acsl/bashrc
+  gecho hoge
   case ${1} in
   "install")
     # acsl install package run_args
@@ -493,13 +495,6 @@ function switch_mode() {
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  pwd
-  cat .acsl/bashrc
-  source .acsl/bashrc
-  cd
-  pwd
-  home
-  pwd
   switch_mode $@
 else
   change_dir_for_init $1
