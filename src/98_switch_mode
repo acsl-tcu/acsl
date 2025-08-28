@@ -4,6 +4,8 @@
 # [Usage]: acsl [command] [options]
 # check_acsl and home functions are done in 99_main
 function switch_mode() {
+  source .acsl/bashrc
+  gecho hoge
   case ${1} in
   "install")
     # acsl install package run_args

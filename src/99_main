@@ -11,13 +11,6 @@
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  pwd
-  cat .acsl/bashrc
-  source .acsl/bashrc
-  cd
-  pwd
-  home
-  pwd
   switch_mode $@
 else
   change_dir_for_init $1
