@@ -6,7 +6,7 @@ version=$1
 sed -i "s/Version: [0-9]\+\.[0-9]\+/Version: ${version}/" ./Debian/DEBIAN/control
 sed -i "s/v[0-9]\+\.[0-9]\+/v${version}/g" ./README.md
 sed -i "s/acsl_[0-9]\+\.[0-9]\+_all.deb/acsl_${version}_all.deb/g" ./README.md
-
+cat ./Debian/DEBIAN/control
 git pull
 rm -f acsl_*_all.deb
 rm -f Debian/usr/bin/acsl
