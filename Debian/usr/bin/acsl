@@ -493,6 +493,7 @@ function switch_mode() {
 #      |> switch_mode
 ###################################################
 if check_acsl; then
+  echo $ACSL_ROS2_DIR
   source $ACSL_ROS2_DIR/bashrc
   home
   switch_mode $@
