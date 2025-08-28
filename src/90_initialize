@@ -1,16 +1,16 @@
 ##############################################
 ## Initilize
-# acsl init/project_dir PROJECT RID [TARGET]
+# acsl init/project_dir PROJECT ROS_DOMAIN_ID [TARGET]
 # init: initialize project on current directory
 # project_dir: initialize project in this directory
 # PROJECT : project name
-# RID : ROS Domain ID
+# ROS_DOMAIN_ID : ROS Domain ID
 # TARGET : _target (optional, default is empty)
 # Example : acsl robot rf 10 robot
 ##############################################
 function initialize_project() {
   PROJECT=${1}
-  RID=$2
+  ROS_DOMAIN_ID=$2
   if [[ $# -eq 3 ]]; then
     TARGET=_${3#_} #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
   else
@@ -19,7 +19,7 @@ function initialize_project() {
   # cat <<_EOT_
   # Initialize acsl project
   #     PROJECT : $PROJECT
-  #     ROS DOMAIN ID : $RID
+  #     ROS DOMAIN ID : $ROS_DOMAIN_ID
   #     TARGET : $TARGET
   # _EOT_
 

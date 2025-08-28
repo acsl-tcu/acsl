@@ -58,11 +58,11 @@ function check_acsl() {
     echo ACTIVE ACSL project
     echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
     echo "PROJECT : $PROJECT"
-    echo "ROS Domain ID : $RID"
+    echo "ROS Domain ID : $ROS_DOMAIN_ID"
     echo "TARGET : $TARGET"
     return 0
   else
-    # echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
+    # echo "Not active ACSL project. Please run 'acsl init PROJECT ROS_DOMAIN_ID [TARGET]'"
     return 1
   fi
 }
