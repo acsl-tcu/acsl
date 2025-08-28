@@ -493,8 +493,6 @@ function switch_mode() {
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  source .acsl/bashrc
-  home
   switch_mode $@
 else
   change_dir_for_init $1
