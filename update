@@ -35,5 +35,5 @@ git push
 echo https://github.com/acsl-tcu/acsl/releases/edit/v${version}
 explorer.exe .
 else
-  echo "version is required: example ./update 2.1"
+  echo "version is required: example ./update 2.0"
 fi
