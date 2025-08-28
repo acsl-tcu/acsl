@@ -11,7 +11,7 @@
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  source $ACSL_ROS2_DIR/bashrc
+  source .acsl/bashrc
   home
   switch_mode $@
 else
