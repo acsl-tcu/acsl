@@ -58,11 +58,11 @@ function check_acsl() {
     echo ACTIVE ACSL project
     echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
     echo "PROJECT : $PROJECT"
-    echo "ROS Domain ID : $RID"
+    echo "ROS Domain ID : $ROS_DOMAIN_ID"
     echo "TARGET : $TARGET"
     return 0
   else
-    # echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
+    # echo "Not active ACSL project. Please run 'acsl init PROJECT ROS_DOMAIN_ID [TARGET]'"
     return 1
   fi
 }
@@ -251,17 +251,17 @@ function remove_package_udev() {
 }
 ##############################################
 ## Initilize
-# acsl init/project_dir PROJECT RID [TARGET]
+# acsl init/project_dir PROJECT ROS_DOMAIN_ID [TARGET]
 # init: initialize project on current directory
 # project_dir: initialize project in this directory
 # PROJECT : project name
-# RID : ROS Domain ID
+# ROS_DOMAIN_ID : ROS Domain ID
 # TARGET : _target (optional, default is empty)
 # Example : acsl robot rf 10 robot
 ##############################################
 function initialize_project() {
   PROJECT=${1}
-  RID=$2
+  ROS_DOMAIN_ID=$2
   if [[ $# -eq 3 ]]; then
     TARGET=_${3#_} #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
   else
@@ -270,7 +270,7 @@ function initialize_project() {
   # cat <<_EOT_
   # Initialize acsl project
   #     PROJECT : $PROJECT
-  #     ROS DOMAIN ID : $RID
+  #     ROS DOMAIN ID : $ROS_DOMAIN_ID
   #     TARGET : $TARGET
   # _EOT_
 
@@ -493,7 +493,7 @@ function switch_mode() {
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  source $ACSL_ROS2_DIR/bashrc
+  source .acsl/bashrc
   home
   switch_mode $@
 else
