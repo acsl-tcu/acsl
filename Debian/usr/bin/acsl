@@ -55,10 +55,14 @@ function docker_push() {
 
 function check_acsl() {
   if [[ -v ORGPATH ]]; then
-    #echo ACTIVE ACSL project
+    echo ACTIVE ACSL project
+    echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
+    echo "PROJECT : $PROJECT"
+    echo "ROS Domain ID : $RID"
+    echo "TARGET : $TARGET"
     return 0
   else
-    echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
+    # echo "Not active ACSL project. Please run 'acsl init PROJECT RID [TARGET]'"
     return 1
   fi
 }
@@ -73,7 +77,7 @@ function change_dir_for_init() {
   if [ "${1-}" = "init" ]; then
     echo "Initialize project in current folder"
   elif [[ -d $1 ]]; then
-    echo "Move to $1 for initialization"
+    echo "Move to $1"
     cd $1
   else
     echo "Create new directory $1 for initialization"
@@ -489,10 +493,7 @@ function switch_mode() {
 #      |> switch_mode
 ###################################################
 if check_acsl; then
-  echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
-  echo "PROJECT : $PROJECT"
-  echo "ROS Domain ID : $RID"
-  echo "TARGET : $TARGET"
+  source $ACSL_ROS2_DIR/bashrc
   home
   switch_mode $@
 else
