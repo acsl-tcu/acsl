@@ -24,5 +24,9 @@ git add .
 git commit -m "update acsl command"
 git push
 
+sed -i "s/v[0-9]\+\.[0-9]\+/v${version}/g" ./README.md
+sed -i "s/acsl_[0-9]\+\.[0-9]\+_all.deb/acsl_${version}_all.deb/g" ./README.md
+
+
 echo https://github.com/acsl-tcu/acsl/releases/edit/v${version}
 explorer.exe .
