@@ -13,6 +13,7 @@
 if check_acsl; then
   pwd
   cat .acsl/bashrc
+  source .acsl/bashrc
   cd
   pwd
   home
