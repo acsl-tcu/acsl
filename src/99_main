@@ -18,7 +18,7 @@ else
     initialize_project ${@:2:($# - 1)}
   elif [ $# -eq 1 ]; then
     cd ~/$1/.acsl
-    0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
+    commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
     cd ~/$1
     bash --rcfile .acsl/bashrc
   else
