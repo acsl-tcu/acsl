@@ -281,6 +281,7 @@ function initialize_project() {
   ACSL_ROS2_DIR="$(pwd)/.acsl"
   echo "create .acsl folder"
   git clone git@github.com:acsl-tcu/ros2.git .acsl --recurse-submodules
+  git clone git@github.com:acsl-tcu/project_common.git common --recurse-submodules
   chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
   chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
   chmod -R a+x $ACSL_WORK_DIR/1_launcher
