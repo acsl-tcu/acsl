@@ -44,13 +44,13 @@ function printOptions() {
 
 ##################################################
 function git_pull() {
-  .acsl/4_docker/common/scripts/gpull $1
+  .acsl/docker/common/scripts/gpull $1
 }
 function colcon_build() {
-  .acsl/0_host_commands/scripts/build_project $@
+  .acsl/commands/scripts/build_project $@
 }
 function docker_push() {
-  .acsl/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+  .acsl/commands/scripts/dpush image_${PROJECT}${TARGET}
 }
 
 function check_acsl() {
@@ -176,7 +176,7 @@ function dpull_check_tag() {
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
   if [[ -n $res ]]; then
     gecho DOCKER PULL: image $tag
-    $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag
+    $ACSL_ROS2_DIR/commands/scripts/dpull $tag
   else
     recho "Not found the image with $tag\n Request update tag list"
   fi
@@ -213,7 +213,7 @@ function remove_package_systemd() {
 function setup_udev() {
   if [[ -f ${PROJECT}${TARGET}.rules ]]; then
     gecho "Setup UDEV"
-    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+    $ACSL_ROS2_DIR/commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
 }
 
@@ -280,13 +280,14 @@ function initialize_project() {
   ACSL_WORK_DIR="$(pwd)"
   ACSL_ROS2_DIR="$(pwd)/.acsl"
   echo "create .acsl folder"
-  git clone git@github.com:acsl-tcu/ros2.git .acsl --recurse-submodules
-  chmod -R a+x $ACSL_ROS2_DIR/0_host_commands
-  chmod -R a+x $ACSL_ROS2_DIR/4_docker/common/scripts
-  chmod -R a+x $ACSL_WORK_DIR/1_launcher
+  git clone git@github.com:acsl-tcu/acsl_infra.git .acsl --recurse-submodules
+  git clone git@github.com:acsl-tcu/project_common.git common --recurse-submodules
+  chmod -R a+x $ACSL_ROS2_DIR/commands
+  chmod -R a+x $ACSL_ROS2_DIR/docker/common/scripts
+  chmod -R a+x $ACSL_WORK_DIR/launcher
   chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
-  source $ACSL_ROS2_DIR/4_docker/common/scripts/super_echo
-  $ACSL_ROS2_DIR/0_host_commands/setup_bashrc $ACSL_WORK_DIR $@
+  source $ACSL_ROS2_DIR/docker/common/scripts/super_echo
+  $ACSL_ROS2_DIR/commands/setup_bashrc $ACSL_WORK_DIR $@
   source $ACSL_ROS2_DIR/bashrc
 
   if [ -e setup$TARGET ]; then
@@ -348,29 +349,29 @@ function install_package() {
     setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
 
     echo "Set ros launch"
-    mkdir -p $ACSL_WORK_DIR/1_launcher
-    cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/1_launcher/* $ACSL_WORK_DIR/1_launcher/
-    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    mkdir -p $ACSL_WORK_DIR/launcher
+    cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/launcher/* $ACSL_WORK_DIR/launcher/
+    chmod -R a+x $ACSL_WORK_DIR/launcher
 
-    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages ]]; then
+    if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE/packages ]]; then
       echo "Install ROS package"
-      mkdir -p $ACSL_WORK_DIR/2_ros_packages
-      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/2_ros_packages/* $ACSL_WORK_DIR/2_ros_packages/
+      mkdir -p $ACSL_WORK_DIR/packages
+      cp -rp $ACSL_WORK_DIR/.install/$PACKAGE/packages/* $ACSL_WORK_DIR/packages/
     fi
 
-    if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} ]]; then
+    if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} ]]; then
       echo "Pull Docker image : dockerfile.${PACKAGE}"
-      mkdir -p $ACSL_WORK_DIR/3_dockerfiles${TARGET}
-      cp $ACSL_WORK_DIR/.install/$PACKAGE/3_dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/3_dockerfiles${TARGET}/
+      mkdir -p $ACSL_WORK_DIR/dockerfiles${TARGET}
+      cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles${TARGET}/
       dpull_check_tag ${PACKAGE}
     fi
 
     echo "set project_launch${TARGET}.sh"
     echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
-    echo "$ACSL_ROS2_DIR/0_host_commands/scripts/dup $@" >>project_launch${TARGET}.sh
+    echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>project_launch${TARGET}.sh
     echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
 
-    $ACSL_ROS2_DIR/0_host_commands/scripts/dup all
+    $ACSL_ROS2_DIR/commands/scripts/dup all
   else
     recho "make package first as a branch on 'ros_package' repo"
   fi
@@ -388,7 +389,7 @@ function remove_package() {
   remove_package_systemd $PACKAGE
   ## ros launch
   source $ACSL_ROS2_DIR/bashrc
-  rm -fr $ACSL_WORK_DIR/1_launcher/launch_${PACKAGE}*
+  rm -fr $ACSL_WORK_DIR/launcher/launch_${PACKAGE}*
   ## ros package
   rm -fr $ACSL_WORK_DIR/.install/${PACKAGE}
   ## docker image
@@ -461,10 +462,10 @@ function switch_mode() {
   "setup_systemd")
     echo "setup systemd for autorun "
     gecho "After complete, reboot and check the ros node works"
-    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    chmod -R a+x $ACSL_WORK_DIR/launcher
     if [[ -f project_launch${TARGET}.sh ]]; then
       chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
-      $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
     fi
     ;;
   "remove_systemd")
@@ -501,7 +502,7 @@ else
     initialize_project ${@:2:($# - 1)}
   elif [ $# -eq 1 ]; then
     cd ~/$1/.acsl
-    0_host_commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
+    commands/scripts/set_bashrc "export DISPLAY" $DISPLAY # remote desktop用
     cd ~/$1
     bash --rcfile .acsl/bashrc
   else

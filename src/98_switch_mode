@@ -64,10 +64,10 @@ function switch_mode() {
   "setup_systemd")
     echo "setup systemd for autorun "
     gecho "After complete, reboot and check the ros node works"
-    chmod -R a+x $ACSL_WORK_DIR/1_launcher
+    chmod -R a+x $ACSL_WORK_DIR/launcher
     if [[ -f project_launch${TARGET}.sh ]]; then
       chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
-      $ACSL_ROS2_DIR/0_host_commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
     fi
     ;;
   "remove_systemd")

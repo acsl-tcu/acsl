@@ -1,7 +1,7 @@
 function setup_udev() {
   if [[ -f ${PROJECT}${TARGET}.rules ]]; then
     gecho "Setup UDEV"
-    $ACSL_ROS2_DIR/0_host_commands/setup_udev ${PROJECT}${TARGET}.rules
+    $ACSL_ROS2_DIR/commands/setup_udev ${PROJECT}${TARGET}.rules
   fi
 }
 

@@ -44,13 +44,13 @@ function printOptions() {
 
 ##################################################
 function git_pull() {
-  .acsl/4_docker/common/scripts/gpull $1
+  .acsl/docker/common/scripts/gpull $1
 }
 function colcon_build() {
-  .acsl/0_host_commands/scripts/build_project $@
+  .acsl/commands/scripts/build_project $@
 }
 function docker_push() {
-  .acsl/0_host_commands/scripts/dpush image_${PROJECT}${TARGET}
+  .acsl/commands/scripts/dpush image_${PROJECT}${TARGET}
 }
 
 function check_acsl() {

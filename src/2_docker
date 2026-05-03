@@ -34,7 +34,7 @@ function dpull_check_tag() {
   res=$(cat $ACSL_ROS2_DIR/tag_list | grep -w $tag)
   if [[ -n $res ]]; then
     gecho DOCKER PULL: image $tag
-    $ACSL_ROS2_DIR/0_host_commands/scripts/dpull $tag
+    $ACSL_ROS2_DIR/commands/scripts/dpull $tag
   else
     recho "Not found the image with $tag\n Request update tag list"
   fi
