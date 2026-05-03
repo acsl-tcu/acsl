@@ -34,7 +34,7 @@ Copy and paste to <br>
 account > Settings > SSH and GPG keys > New SSH key
 ```
 
-### [Install docker](https://github.com/acsl-tcu/ros2?tab=readme-ov-file#setup)
+### [Install docker](https://github.com/acsl-tcu/acsl_infra?tab=readme-ov-file#setup)
   
 ### init
 
@@ -63,7 +63,7 @@ Install a package
   acsl install PACKAGE RUN_ARGS
 ```
 
-PACKAGE : package name is equal to the branch name of [ros_package](https://github.com/acsl-tcu/ros_package)<br />
+PACKAGE : package name is equal to the branch name of [acsl_package](https://github.com/acsl-tcu/acsl_package)<br />
 RUN_ARGS : arguments to run launch_PACKAGE.sh<br />
 inside the program following command called
 
@@ -87,10 +87,10 @@ PACKAGE consists of followings
 
 ```
 WORK_DIR/
-  |- 1_ros_launcher/
+  |- launcher/
     |- launch_PACKAGE.sh
-  |- 2_ros_packages/
-  |- 3_dockerfiles/
+  |- packages/
+  |- dockerfiles/
     |- dockerfile.PACKAGE
   |- PACKAGE.rules
   |- project_launch.sh
@@ -131,7 +131,7 @@ dpush image_PROJECT
 ```
 
 ***For package image : check its versatility first.***
-Prepare dockerfile.PACKAGE in 3_dockerfiles
+Prepare dockerfile.PACKAGE in dockerfiles/
 
 ```bash
 git clone git@PROJECT.git
@@ -153,7 +153,7 @@ dupin dev
 #### Direct build image from docker file
 
 ```bash
-docker build . -f 3_dockerfiles/dockerfile.***
+docker build . -f dockerfiles/dockerfile.***
 ```
 
 Develop your package in the container.
