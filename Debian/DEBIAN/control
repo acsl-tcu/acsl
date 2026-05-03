@@ -1,5 +1,5 @@
 Package: acsl
-Version: 3.0
+Version: 3.1
 Description: package manager for acsl projects
 Maintainer: Kazuma SEKIGUCHI <ksekiguc@tcu.ac.jp>
 Architecture: all
