@@ -5,7 +5,6 @@
 ```bash
 curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v3.1/acsl_3.1_all.deb
 sudo dpkg -i acsl_3.1_all.deb
-sudo chmod a+x /usr/bin/acsl
 rm -f acsl_3.1_all.deb
 ```
 
@@ -53,6 +52,13 @@ Caution : All changes will be removed.
 ```bash
   cd work_dir
   acsl clean
+```
+
+### version
+
+```bash
+acsl --version
+acsl -v
 ```
 
 ### install package
@@ -114,7 +120,7 @@ Make *dockerfile.PACKAGE* and ask to build the image by sending it to ACSL manag
 
 ```bash
   acsl/Debian> md5sum usr/bin/acsl | tee DEBIAN/md5sums
-  acsl> fakeroot dpkg-deb --build Debian .
+  acsl> fakeroot dpkg-deb -Zgzip --build Debian .
 ```
 
 ### build Docker image

@@ -10,6 +10,11 @@
 # |-Y> home
 #      |> switch_mode
 ###################################################
+if [[ "${1-}" = "--version" || "${1-}" = "-v" ]]; then
+  print_acsl_version
+  exit 0
+fi
+
 if check_acsl; then
   switch_mode $@
 else
