@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+ACSL_VERSION="3.1"
+
 #############################################################
 # Assets
 #############################################################
@@ -40,6 +42,10 @@ function printOptions() {
     fi
   done
   echo
+}
+
+function print_acsl_version() {
+  echo "acsl ${ACSL_VERSION}"
 }
 
 ##################################################
