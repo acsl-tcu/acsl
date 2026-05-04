@@ -17,11 +17,12 @@ rm -f Debian/usr/bin/acsl
     sed '1{/^#!\/.*sh$/d}' "$f"
   done
 } >Debian/usr/bin/acsl
+chmod 755 Debian/usr/bin/acsl
 
 cd Debian
 md5sum usr/bin/acsl | tee DEBIAN/md5sums
 cd ..
-fakeroot dpkg-deb --build Debian .
+fakeroot dpkg-deb -Zgzip --build Debian .
 sudo dpkg -i acsl_${version}_all.deb
 
 tmp=gh repo list acsl-tcu | grep project | fmt | awk '{print $1}' | sed -e "s|acsl-tcu/project
