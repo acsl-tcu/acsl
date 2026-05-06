@@ -3,9 +3,9 @@
 ## Install
 
 ```bash
-curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v3.1/acsl_3.1_all.deb
-sudo dpkg -i acsl_3.1_all.deb
-rm -f acsl_3.1_all.deb
+curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v3.2/acsl_3.2_all.deb
+sudo dpkg -i acsl_3.2_all.deb
+rm -f acsl_3.2_all.deb
 ```
 
 ### Uninstall
