@@ -39,7 +39,7 @@ function install_package() {
     fi
 
     echo "Set udev rule"
-    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
+    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/rules/${PACKAGE}.rules
 
     echo "Set ros launch"
     mkdir -p $ACSL_WORK_DIR/launcher

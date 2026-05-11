@@ -217,9 +217,9 @@ function remove_package_systemd() {
   fi
 }
 function setup_udev() {
-  if [[ -f ${PROJECT}${TARGET}.rules ]]; then
+  if [[ -f rules/${PROJECT}${TARGET}.rules ]]; then
     gecho "Setup UDEV"
-    $ACSL_ROS2_DIR/commands/setup_udev ${PROJECT}${TARGET}.rules
+    $ACSL_ROS2_DIR/commands/setup_udev rules/${PROJECT}${TARGET}.rules
   fi
 }
 
@@ -234,16 +234,17 @@ function remove_udev() {
 
 function set_package_udev() {
   if [[ -f ${1} ]]; then
-    echo "### $PACKAGE ###" >>${PROJECT}${TARGET}.rules
-    cat ${1} >>${PROJECT}${TARGET}.rules
-    echo "### $PACKAGE END ###" >>${PROJECT}${TARGET}.rules
+    mkdir -p rules
+    echo "### $PACKAGE ###" >>rules/${PROJECT}${TARGET}.rules
+    cat ${1} >>rules/${PROJECT}${TARGET}.rules
+    echo "### $PACKAGE END ###" >>rules/${PROJECT}${TARGET}.rules
   fi
 }
 
 function remove_package_udev() {
   echo "Remove udev"
   PACKAGE=$1
-  UDEV_TARGET=${PROJECT}${TARGET}.rules
+  UDEV_TARGET=rules/${PROJECT}${TARGET}.rules
   RULES="### $PACKAGE ###"
   RULEE="### $PACKAGE END ###"
   # 文字列Aが含まれる行の行数を取得
@@ -353,7 +354,7 @@ function install_package() {
     fi
 
     echo "Set udev rule"
-    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/${PACKAGE}.rules
+    setup_udev $ACSL_WORK_DIR/.install/$PACKAGE/rules/${PACKAGE}.rules
 
     echo "Set ros launch"
     mkdir -p $ACSL_WORK_DIR/launcher
