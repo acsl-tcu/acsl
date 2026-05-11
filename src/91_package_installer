@@ -53,10 +53,10 @@ function install_package() {
     fi
 
     if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} ]]; then
-      echo "Pull Docker image : dockerfile.${PACKAGE}"
+      echo "Build Docker image : dockerfile.${PACKAGE}"
       mkdir -p $ACSL_WORK_DIR/dockerfiles${TARGET}
       cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles${TARGET}/
-      dpull_check_tag ${PACKAGE}
+      dbuild image_${PROJECT}${TARGET}${x86} ${PACKAGE}${x86} ${PACKAGE}
     fi
 
     echo "set project_launch${TARGET}.sh"
@@ -64,12 +64,16 @@ function install_package() {
     echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>project_launch${TARGET}.sh
     echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
 
-    $ACSL_ROS2_DIR/commands/scripts/dup all
+    # setup の full パートにビルドコマンドを追記（プロジェクトイメージbuildの直後に挿入）
+    if [[ -f $ACSL_WORK_DIR/setup ]] && ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/setup; then
+      sed -i "/dbuild.*image_/a\\
+  ### ${PACKAGE} ###\\
+  dbuild image_\${PROJECT}\${TARGET}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
+  ### ${PACKAGE} END ###" $ACSL_WORK_DIR/setup
+    fi
   else
     recho "make package first as a branch on 'ros_package' repo"
   fi
-
-  exit 1
 }
 
 ###################################################
