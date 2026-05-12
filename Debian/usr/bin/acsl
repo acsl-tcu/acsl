@@ -411,14 +411,12 @@ function switch_mode() {
   "update_tag_list")
     update_tag_list
     ;;
-  "update")
-    echo "Update project files from github"
-    git_pull
-    if [ -e setup ]; then
-      gecho "Run setup"
-      chmod a+x setup
-      ./setup
-    fi
+  "refresh_bashrc")
+    echo "Regenerate .acsl/bashrc"
+    rm -f $ACSL_ROS2_DIR/bashrc
+    cp $ACSL_ROS2_DIR/bashrc.template $ACSL_ROS2_DIR/bashrc 2>/dev/null || touch $ACSL_ROS2_DIR/bashrc
+    $ACSL_ROS2_DIR/commands/setup_bashrc $ACSL_WORK_DIR $PROJECT $ROS_DOMAIN_ID
+    gecho "bashrc regenerated. Run: source .acsl/bashrc"
     ;;
   "clean")
     cd $ACSL_WORK_DIR
