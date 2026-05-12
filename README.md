@@ -3,9 +3,9 @@
 ## Install
 
 ```bash
-curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v3.2/acsl_3.2_all.deb
-sudo dpkg -i acsl_3.2_all.deb
-rm -f acsl_3.2_all.deb
+curl -L -O https://github.com/acsl-tcu/acsl/releases/download/v3.3/acsl_3.3_all.deb
+sudo dpkg -i acsl_3.3_all.deb
+rm -f acsl_3.3_all.deb
 ```
 
 ### Uninstall
@@ -98,7 +98,8 @@ WORK_DIR/
   |- packages/
   |- dockerfiles/
     |- dockerfile.PACKAGE
-  |- PACKAGE.rules
+  |- rules/
+    |- PROJECT.rules
   |- project_launch.sh
 ```
 
