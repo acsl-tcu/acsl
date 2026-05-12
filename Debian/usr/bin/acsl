@@ -318,27 +318,27 @@ function initialize_project() {
 #############################################################
 
 function install_package() {
+  local PACKAGE=${1}
+  local SAVED_DIR=$(pwd)
 
-  # 引数の数を確認
   echo "### 引数一覧"
   for argv in $@; do
     echo ${argv}
   done
   echo
-  PACKAGE=${1}
 
   ####################################
   ##  Install package main
   ####################################
   if [[ ! -d $ACSL_WORK_DIR/.install ]]; then
-    mkdir $ACSL_WORK_DIR/.install
-    cd $ACSL_WORK_DIR/.install
-    git clone git@github.com:acsl-tcu/acsl_package main
+    mkdir -p $ACSL_WORK_DIR/.install
+    git clone git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/main
   fi
   # update package_list
   cd $ACSL_WORK_DIR/.install/main
   git fetch
   package_list=($(git branch -a | grep remote | grep -v HEAD | grep -v main | sed -e "s|remotes/origin/||g"))
+  cd $ACSL_WORK_DIR
 
   if [[ -n $(echo ${package_list[@]} | fmt -1 | grep -x $PACKAGE) ]]; then
     ## udev.rule
@@ -349,6 +349,7 @@ function install_package() {
     if [[ -d $ACSL_WORK_DIR/.install/$PACKAGE ]]; then
       cd $ACSL_WORK_DIR/.install/$PACKAGE
       git pull
+      cd $ACSL_WORK_DIR
     else
       git clone -b $PACKAGE --depth 1 git@github.com:acsl-tcu/acsl_package $ACSL_WORK_DIR/.install/$PACKAGE --recurse-submodules
     fi
@@ -369,15 +370,17 @@ function install_package() {
 
     if [[ -f $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} ]]; then
       echo "Build Docker image : dockerfile.${PACKAGE}"
-      mkdir -p $ACSL_WORK_DIR/dockerfiles${TARGET}
-      cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles${TARGET}/
+      mkdir -p $ACSL_WORK_DIR/dockerfiles
+      cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles/
       dbuild image_${PROJECT}${TARGET}${x86} ${PACKAGE}${x86} ${PACKAGE}
     fi
 
     echo "set project_launch${TARGET}.sh"
-    echo "### $PACKAGE ###" >>project_launch${TARGET}.sh
-    echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>project_launch${TARGET}.sh
-    echo "### $PACKAGE END ###" >>project_launch${TARGET}.sh
+    if ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/project_launch${TARGET}.sh 2>/dev/null; then
+      echo "### $PACKAGE ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
+      echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
+      echo "### $PACKAGE END ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
+    fi
 
     # setup の full パートにビルドコマンドを追記（プロジェクトイメージbuildの直後に挿入）
     if [[ -f $ACSL_WORK_DIR/setup ]] && ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/setup; then
@@ -386,9 +389,13 @@ function install_package() {
   dbuild image_\${PROJECT}\${TARGET}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
   ### ${PACKAGE} END ###" $ACSL_WORK_DIR/setup
     fi
+
+    gecho "Install complete: $PACKAGE"
   else
     recho "make package first as a branch on 'ros_package' repo"
   fi
+
+  cd $SAVED_DIR
 }
 
 ###################################################
