@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-ACSL_VERSION="3.2"
+ACSL_VERSION="3.3"
 
 #############################################################
 # Assets
@@ -56,7 +56,7 @@ function colcon_build() {
   .acsl/commands/scripts/build_project $@
 }
 function docker_push() {
-  .acsl/commands/scripts/dpush image_${PROJECT}${TARGET}
+  .acsl/commands/scripts/dpush image_${PROJECT}
 }
 
 function check_acsl() {
@@ -65,19 +65,11 @@ function check_acsl() {
     echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
     echo "PROJECT : $PROJECT"
     echo "ROS Domain ID : $ROS_DOMAIN_ID"
-    echo "TARGET : $TARGET"
     return 0
   else
-    # echo "Not active ACSL project. Please run 'acsl init PROJECT ROS_DOMAIN_ID [TARGET]'"
     return 1
   fi
 }
-# if check_acsl; then
-#   echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
-# else
-#   echo "Exit"
-#   exit 1
-# fi
 
 function change_dir_for_init() {
   if [ "${1-}" = "init" ]; then
@@ -94,30 +86,18 @@ function change_dir_for_init() {
 
 function check_empty() {
   if [ -z "$(find . -mindepth 1 -print -quit)" ]; then
-    # echo "Directory is empty"
-    # echo $PWD
     return 0
   else
-    # echo "Directory is not empty"
-    # echo $PWD
     return 1
   fi
 }
-
-# change_dir_for_init $1
-# if check_empty; then
-#   echo "Directory is emptyaaa"
-# else
-#   echo "Directory is not emptyaaa"
-#   exit 1
-# fi
 ###################################################
 # Information
 ###################################################
 function man() {
   case ${1} in
   "init")
-    echo "Usage : acsl prject_dir project_name ros_domain_id (target)"
+    echo "Usage : acsl project_dir project_name ros_domain_id"
     ;;
   "install")
     echo "Usage : acsl install package_name"
@@ -206,20 +186,19 @@ function remove_systemd() {
 function remove_package_systemd() {
   echo "Remove systemd"
   PACKAGE=$1
-  SYSD_TARGET=project_launch${TARGET}.sh
+  SYSD_FILE=project_launch.sh
   LAUNCHS="### $PACKAGE ###"
   LAUNCHE="### $PACKAGE END ###"
-  # 文字列Aが含まれる行の行数を取得
-  lines=($(grep -n "$LAUNCHS" "$SYSD_TARGET" | cut -d: -f1))
-  linee=($(grep -n "$LAUNCHE" "$SYSD_TARGET" | cut -d: -f1))
+  lines=($(grep -n "$LAUNCHS" "$SYSD_FILE" | cut -d: -f1))
+  linee=($(grep -n "$LAUNCHE" "$SYSD_FILE" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -i -e "${lines},${linee}d" $SYSD_TARGET
+    sed -i -e "${lines},${linee}d" $SYSD_FILE
   fi
 }
 function setup_udev() {
-  if [[ -f rules/${PROJECT}${TARGET}.rules ]]; then
+  if [[ -f rules/${PROJECT}.rules ]]; then
     gecho "Setup UDEV"
-    $ACSL_ROS2_DIR/commands/setup_udev rules/${PROJECT}${TARGET}.rules
+    $ACSL_ROS2_DIR/commands/setup_udev rules/${PROJECT}.rules
   fi
 }
 
@@ -235,51 +214,38 @@ function remove_udev() {
 function set_package_udev() {
   if [[ -f ${1} ]]; then
     mkdir -p rules
-    echo "### $PACKAGE ###" >>rules/${PROJECT}${TARGET}.rules
-    cat ${1} >>rules/${PROJECT}${TARGET}.rules
-    echo "### $PACKAGE END ###" >>rules/${PROJECT}${TARGET}.rules
+    echo "### $PACKAGE ###" >>rules/${PROJECT}.rules
+    cat ${1} >>rules/${PROJECT}.rules
+    echo "### $PACKAGE END ###" >>rules/${PROJECT}.rules
   fi
 }
 
 function remove_package_udev() {
   echo "Remove udev"
   PACKAGE=$1
-  UDEV_TARGET=rules/${PROJECT}${TARGET}.rules
+  UDEV_FILE=rules/${PROJECT}.rules
   RULES="### $PACKAGE ###"
   RULEE="### $PACKAGE END ###"
-  # 文字列Aが含まれる行の行数を取得
-  lines=($(grep -n "$RULES" "$UDEV_TARGET" | cut -d: -f1))
-  linee=($(grep -n "$RULEE" "$UDEV_TARGET" | cut -d: -f1))
+  lines=($(grep -n "$RULES" "$UDEV_FILE" | cut -d: -f1))
+  linee=($(grep -n "$RULEE" "$UDEV_FILE" | cut -d: -f1))
   if [[ -n $lines ]]; then
-    sed -i -e "${lines},${linee}d" $UDEV_TARGET
+    sed -i -e "${lines},${linee}d" $UDEV_FILE
   fi
   echo "Stop udev service"
   remove_udev
 }
 ##############################################
 ## Initilize
-# acsl init/project_dir PROJECT ROS_DOMAIN_ID [TARGET]
+# acsl init/project_dir PROJECT ROS_DOMAIN_ID
 # init: initialize project on current directory
 # project_dir: initialize project in this directory
 # PROJECT : project name
 # ROS_DOMAIN_ID : ROS Domain ID
-# TARGET : _target (optional, default is empty)
-# Example : acsl robot rf 10 robot
+# Example : acsl robot rf 10
 ##############################################
 function initialize_project() {
   PROJECT=${1}
   ROS_DOMAIN_ID=$2
-  if [[ $# -eq 3 ]]; then
-    TARGET=_${3#_} #  means : ${PROJECT}${TARGET} = $1_$3 if $3 exists
-  else
-    TARGET=""
-  fi
-  # cat <<_EOT_
-  # Initialize acsl project
-  #     PROJECT : $PROJECT
-  #     ROS DOMAIN ID : $ROS_DOMAIN_ID
-  #     TARGET : $TARGET
-  # _EOT_
 
   ## Clone project repository
   echo "Load project: project_${PROJECT}"
@@ -290,22 +256,23 @@ function initialize_project() {
   git clone git@github.com:acsl-tcu/acsl_infra.git .acsl --recurse-submodules
   git clone git@github.com:acsl-tcu/project_common.git common --recurse-submodules
   chmod -R a+rx,a-w $ACSL_WORK_DIR/common/
+  mkdir -p $ACSL_WORK_DIR/Data
   chmod -R a+x $ACSL_ROS2_DIR/commands
   chmod -R a+x $ACSL_ROS2_DIR/docker/common/scripts
   chmod -R a+x $ACSL_WORK_DIR/launcher
-  chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
+  chmod a+x $ACSL_WORK_DIR/project_launch.sh
   source $ACSL_ROS2_DIR/docker/common/scripts/super_echo
   $ACSL_ROS2_DIR/commands/setup_bashrc $ACSL_WORK_DIR $@
   source $ACSL_ROS2_DIR/bashrc
 
-  if [ -e setup$TARGET ]; then
-    gecho "Run setup$TARGET"
-    chmod a+x setup$TARGET
-    ./setup$TARGET full
+  if [ -e setup ]; then
+    gecho "Run setup"
+    chmod a+x setup
+    ./setup full
   else
-    echo "No setup$TARGET found, skip"
+    echo "No setup found, skip"
     dpull jazzy$x86
-    dtag jazzy$x86 image_${PROJECT}${TARGET}${x86}
+    dtag jazzy$x86 image_${PROJECT}${x86}
   fi
 
   gecho "Do following command every login
@@ -372,21 +339,21 @@ function install_package() {
       echo "Build Docker image : dockerfile.${PACKAGE}"
       mkdir -p $ACSL_WORK_DIR/dockerfiles
       cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles/
-      dbuild image_${PROJECT}${TARGET}${x86} ${PACKAGE}${x86} ${PACKAGE}
+      dbuild image_${PROJECT}${x86} ${PACKAGE}${x86} ${PACKAGE}
     fi
 
-    echo "set project_launch${TARGET}.sh"
-    if ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/project_launch${TARGET}.sh 2>/dev/null; then
-      echo "### $PACKAGE ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
-      echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
-      echo "### $PACKAGE END ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
+    echo "set project_launch.sh"
+    if ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/project_launch.sh 2>/dev/null; then
+      echo "### $PACKAGE ###" >>$ACSL_WORK_DIR/project_launch.sh
+      echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>$ACSL_WORK_DIR/project_launch.sh
+      echo "### $PACKAGE END ###" >>$ACSL_WORK_DIR/project_launch.sh
     fi
 
     # setup の full パートにビルドコマンドを追記（プロジェクトイメージbuildの直後に挿入）
     if [[ -f $ACSL_WORK_DIR/setup ]] && ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/setup; then
       sed -i "/dbuild.*image_/a\\
   ### ${PACKAGE} ###\\
-  dbuild image_\${PROJECT}\${TARGET}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
+  dbuild image_\${PROJECT}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
   ### ${PACKAGE} END ###" $ACSL_WORK_DIR/setup
     fi
 
@@ -447,26 +414,20 @@ function switch_mode() {
   "update")
     echo "Update project files from github"
     git_pull
-    if [ -e setup$TARGET ]; then
-      gecho "Run setup$TARGET"
-      chmod a+x setup$TARGET
-      ./setup$TARGET
+    if [ -e setup ]; then
+      gecho "Run setup"
+      chmod a+x setup
+      ./setup
     fi
     ;;
   "clean")
-    # acsl clean
-    # To clean up all
     cd $ACSL_WORK_DIR
     echo "Delete ALL ACSL system"
     export PATH="$ORGPATH"
-    # udev 登録解除
     echo "Deactivate udev"
     remove_udev
-
-    # systemd 登録解除
     echo "Unload systemd"
     remove_systemd
-
     echo "Delete project directory"
     cd $ACSL_WORK_DIR/..
     rm -fr $ACSL_WORK_DIR
@@ -482,9 +443,9 @@ function switch_mode() {
     echo "setup systemd for autorun "
     gecho "After complete, reboot and check the ros node works"
     chmod -R a+x $ACSL_WORK_DIR/launcher
-    if [[ -f project_launch${TARGET}.sh ]]; then
-      chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
-      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+    if [[ -f project_launch.sh ]]; then
+      chmod a+x $ACSL_WORK_DIR/project_launch.sh
+      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch.sh
     fi
     ;;
   "remove_systemd")

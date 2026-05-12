@@ -30,26 +30,20 @@ function switch_mode() {
   "update")
     echo "Update project files from github"
     git_pull
-    if [ -e setup$TARGET ]; then
-      gecho "Run setup$TARGET"
-      chmod a+x setup$TARGET
-      ./setup$TARGET
+    if [ -e setup ]; then
+      gecho "Run setup"
+      chmod a+x setup
+      ./setup
     fi
     ;;
   "clean")
-    # acsl clean
-    # To clean up all
     cd $ACSL_WORK_DIR
     echo "Delete ALL ACSL system"
     export PATH="$ORGPATH"
-    # udev 登録解除
     echo "Deactivate udev"
     remove_udev
-
-    # systemd 登録解除
     echo "Unload systemd"
     remove_systemd
-
     echo "Delete project directory"
     cd $ACSL_WORK_DIR/..
     rm -fr $ACSL_WORK_DIR
@@ -65,9 +59,9 @@ function switch_mode() {
     echo "setup systemd for autorun "
     gecho "After complete, reboot and check the ros node works"
     chmod -R a+x $ACSL_WORK_DIR/launcher
-    if [[ -f project_launch${TARGET}.sh ]]; then
-      chmod a+x $ACSL_WORK_DIR/project_launch${TARGET}.sh
-      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch${TARGET}.sh
+    if [[ -f project_launch.sh ]]; then
+      chmod a+x $ACSL_WORK_DIR/project_launch.sh
+      $ACSL_ROS2_DIR/commands/setup_systemd $ACSL_WORK_DIR/project_launch.sh
     fi
     ;;
   "remove_systemd")

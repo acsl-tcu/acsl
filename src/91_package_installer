@@ -57,21 +57,21 @@ function install_package() {
       echo "Build Docker image : dockerfile.${PACKAGE}"
       mkdir -p $ACSL_WORK_DIR/dockerfiles
       cp $ACSL_WORK_DIR/.install/$PACKAGE/dockerfiles/dockerfile.${PACKAGE} $ACSL_WORK_DIR/dockerfiles/
-      dbuild image_${PROJECT}${TARGET}${x86} ${PACKAGE}${x86} ${PACKAGE}
+      dbuild image_${PROJECT}${x86} ${PACKAGE}${x86} ${PACKAGE}
     fi
 
-    echo "set project_launch${TARGET}.sh"
-    if ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/project_launch${TARGET}.sh 2>/dev/null; then
-      echo "### $PACKAGE ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
-      echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
-      echo "### $PACKAGE END ###" >>$ACSL_WORK_DIR/project_launch${TARGET}.sh
+    echo "set project_launch.sh"
+    if ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/project_launch.sh 2>/dev/null; then
+      echo "### $PACKAGE ###" >>$ACSL_WORK_DIR/project_launch.sh
+      echo "$ACSL_ROS2_DIR/commands/scripts/dup $@" >>$ACSL_WORK_DIR/project_launch.sh
+      echo "### $PACKAGE END ###" >>$ACSL_WORK_DIR/project_launch.sh
     fi
 
     # setup の full パートにビルドコマンドを追記（プロジェクトイメージbuildの直後に挿入）
     if [[ -f $ACSL_WORK_DIR/setup ]] && ! grep -q "### $PACKAGE ###" $ACSL_WORK_DIR/setup; then
       sed -i "/dbuild.*image_/a\\
   ### ${PACKAGE} ###\\
-  dbuild image_\${PROJECT}\${TARGET}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
+  dbuild image_\${PROJECT}\${x86} ${PACKAGE}\${x86} ${PACKAGE}\\
   ### ${PACKAGE} END ###" $ACSL_WORK_DIR/setup
     fi
 

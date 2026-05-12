@@ -4,7 +4,7 @@
 function man() {
   case ${1} in
   "init")
-    echo "Usage : acsl prject_dir project_name ros_domain_id (target)"
+    echo "Usage : acsl project_dir project_name ros_domain_id"
     ;;
   "install")
     echo "Usage : acsl install package_name"

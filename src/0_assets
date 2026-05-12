@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-ACSL_VERSION="3.2"
+ACSL_VERSION="3.3"
 
 #############################################################
 # Assets
@@ -56,7 +56,7 @@ function colcon_build() {
   .acsl/commands/scripts/build_project $@
 }
 function docker_push() {
-  .acsl/commands/scripts/dpush image_${PROJECT}${TARGET}
+  .acsl/commands/scripts/dpush image_${PROJECT}
 }
 
 function check_acsl() {
@@ -65,19 +65,11 @@ function check_acsl() {
     echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
     echo "PROJECT : $PROJECT"
     echo "ROS Domain ID : $ROS_DOMAIN_ID"
-    echo "TARGET : $TARGET"
     return 0
   else
-    # echo "Not active ACSL project. Please run 'acsl init PROJECT ROS_DOMAIN_ID [TARGET]'"
     return 1
   fi
 }
-# if check_acsl; then
-#   echo "ACSL_WORK_DIR : $ACSL_WORK_DIR"
-# else
-#   echo "Exit"
-#   exit 1
-# fi
 
 function change_dir_for_init() {
   if [ "${1-}" = "init" ]; then
@@ -94,20 +86,8 @@ function change_dir_for_init() {
 
 function check_empty() {
   if [ -z "$(find . -mindepth 1 -print -quit)" ]; then
-    # echo "Directory is empty"
-    # echo $PWD
     return 0
   else
-    # echo "Directory is not empty"
-    # echo $PWD
     return 1
   fi
 }
-
-# change_dir_for_init $1
-# if check_empty; then
-#   echo "Directory is emptyaaa"
-# else
-#   echo "Directory is not emptyaaa"
-#   exit 1
-# fi
